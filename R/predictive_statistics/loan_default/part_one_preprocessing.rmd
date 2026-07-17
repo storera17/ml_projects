@@ -143,7 +143,7 @@ for (col in names(df)[sapply(df, is.factor)]) {
 
 ## Visualiztion of Numeric Variable Distribution
 
-### Histograms of the NUmeric Variables
+### Histograms of the Numeric Variables
 
 ```{r}
 DataExplorer::plot_histogram(df_num,
@@ -152,4 +152,40 @@ DataExplorer::plot_histogram(df_num,
                              nrow = 3)
 ```
 
+### Box Plots of the Numeric Variables
+
+> The boxplots are illustrations of the distributions and spread of data for the numeric variables across the loan default outcome.
+
+```{r}
+df_num_targ <- df_num %>%
+  mutate(loan_default = df_raw$loan_default)
+DataExplorer::plot_boxplot(
+  df_num_targ,
+  by = "loan_default",
+  ggtheme = theme_minimal(),
+  ncol = 3,
+  nrow = 3)
+```
+
+### Visualization of Correlation between Variables with Heat Map
+
+ > The strength and direction of linear relationships between numeric variables in the dataset is displayed in th heat map below. 
+
+```{r}
+DataExplorer::plot_correlation(df_num,
+                               type="continuous",
+                               cor_args = list("use" = "pairwise.complete.obs")
+```
+
+## Visualization of Categorical Variable Distribution with Bar characters
+
+> The bar charts display the frequency distributions of the categorical variables in the dataset. The majority of loans for the response variable ‘loan_default’ are no, which means the majority of loans did not default during modeling
+
+```{r}
+# Select only categorical variables
+DataExplorer::plot_bar(df_cat,
+                       ggtheme = theme_minimal(),
+                       ncol = 3,
+                       nrow = 3)
+```
 
