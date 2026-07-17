@@ -28,3 +28,128 @@ if (!require(mlba)) {
 }
 pacman::p_load(mlba,tidyverse)
 ```
+# Data Overview & Summary Statistics
+
+## Loading in the Data & Checking Data Type
+
+> Training data set was coined `train.csv` and is not provided. 
+
+```{r}
+df_raw <- read_csv("train.csv", show_col_types = FALSE)
+
+# Convert response variable to factor
+df_raw <- df_raw %>%
+  mutate(loan_default=factor(loan_default, levels=c("No","Yes")))
+
+# Preview data
+str(df_raw)
+```
+
+## Data Management
+
+### Numeric Variables 
+
+> The numeric variables were gathered together into `df_num` separate from the categorical variables for closer analysis. The variables were examined using the `str()` function to confirm all of the gathered variables were numeric.
+
+```{r}
+df_num <- df_raw %>%
+  dplyr::select(where(is.numeric))
+```
+
+> The number of unqiue instances was captured using the following code below:
+
+```{r}
+sapply(df_num, n_unique)
+```
+
+### Converting Numeric Variables into Factors & Remove from 'df_num'
+
+```{r}
+# Convert to factors
+df_raw$inq_last_6mths <- as.factor(df_raw$inq_last_6mths)
+df_raw$acc_now_delinq <- as.factor(df_raw$acc_now_delinq)
+
+# Remove them
+df_num <- df_num %>%
+  select(-inq_last_6mths,
+         -acc_now_delinq)
+```
+
+### Categorical Variables
+
+> The numeric variables were gathered together into `df_cat` separate from the numeric variables. The variables were examined using the `str()` function to confirm all of the gathered variables were categoricals.
+
+```{r}
+df_cat <- df_raw %>%
+  dplyr::select(where(\(x) is.character(x) || is.factor(x)))
+```
+
+### Converting Character Variables to Date Variables
+
+```{r}
+df_cat <- df_cat %>%
+  mutate(issue_d = lubridate::my(issue_d),
+    earliest_cr_line = lubridate::my(earliest_cr_line),
+    last_credit_pull_d = lubridate::my(last_credit_pull_d)
+  )
+```
+
+> Next, we will examine the number of unique data values for each categorical variable. This will allow us to determine which variable should be converted into a factor.
+
+```{r}
+sapply(df_cat, n_unique)
+```
+
+### Converting Character Variables to factors
+
+> Convert the variables mentioned above from characters to factors. Check if this was done successfully using the `str()` function.
+
+```{r}
+df_cat <- df_cat %>%
+  mutate(term=factor(term, levels=c("36 months", "60 months")),
+          initial_list_status=factor(initial_list_status, levels="f", "w")
+  )
+df_cat$emp_length <- as.factor(df_cat$emp_length)
+df_cat$home_ownership <- as.factor(df_cat$home_ownership)
+df_cat$verification_status <- as.factor(df_cat$verification_status)
+df_cat$purpose <- as.factor(df_cat$purpose)
+df_cat$initial_list_status <- as.factor(df_cat$initial_list_status)
+df_cat$application_type <- as.factor(df_cat$application_type)
+```
+
+## Data Summaries
+
+### Key Summary Statistics
+
+> The key summary statistics are shown using the `skim()` function from the `skimr` package. The means of the numeric variables vary with the highest mean belonging to `annual_inc` at approximately 74,247, which is the average annual income, so it makes sense that a number would be this large for this variable. The smallest mean value of the numeric variables belonged to the variable `mort_acc` with a mean of about 1.8. The standard deviation of the numeric variables also had a wide range. The largest standard deviation also belonged to the variable `annual_inc` as well as the smallest standard deviation also belonged to `mort_acc`. The medians of the numeric variables also had a wide range with the smallest also being of the variable `mort_acc` and the largest belonging to `annual_inc`. Several variables had minimum values of zero which was the lowest minimum value. The largest maximum value belonged to the variable `annual_inc` at approximately 8,706,582.
+
+```{r}
+skimr::skim(df_num)
+```
+
+```{r}
+skimr::skim(df_cat)
+```
+
+### Categorical Variables - Frequency Tables
+
+```{r}
+for (col in names(df)[sapply(df, is.factor)]) {
+    print(table(df[[col]])[1:5])
+}
+```
+
+# Data Visualization
+
+## Visualiztion of Numeric Variable Distribution
+
+### Histograms of the NUmeric Variables
+
+```{r}
+DataExplorer::plot_histogram(df_num,
+                             ggtheme = theme_minimal(),
+                             ncol = 3,
+                             nrow = 3)
+```
+
+
