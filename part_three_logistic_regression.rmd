@@ -1,0 +1,384 @@
+---
+title: "Logistic Regression For Predicting Loan Default"
+author: "storera17"
+output:
+  html_document:
+    code_folding: show
+    df_print: paged
+    number_sections: yes
+    theme: readable
+    toc: yes
+    toc_float: yes
+    code_download: yes
+  word_document:
+    toc: no
+params:
+  response_var: "loan_default"
+  id_var: ["load_id"] #identifier to be dropped 
+---
+
+```{r setup, include=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE,warning=FALSE)
+knitr::opts_chunk$set(fig.width=6, fig.height=4)
+
+if(require(pacman)==0)
+   {install.packages("pacman")}
+pacman::p_load(devtools,caret,cluster,dplyr,fastDummies,leaps,pacman,tidyverse,skimr,fastDummies,GGally,DataExplorer,ggrepel,ggthemes,dslabs,lubridate,janitor,e1071,scales,recipes,magrittr,forcats,tidycensus,zipcodeR,tidygeocoder,tigris,sf)
+
+if (!require(mlba)) {
+  library(devtools)
+  install_github("gedeck/mlba/mlba", force=TRUE)
+}
+pacman::p_load(mlba,tidyverse)
+```
+
+# Introduction
+**Objective**
+
+The objective of this project is to determine loan default through historical loan and applicant data. Accurate predictions of loan default directly impact the decisions lenders make in regards to who loans are bestowed upon. 
+
+**Brief Project Summary (Historical and Present)**
+First, we "cleaned" the training dataset. Then, this "cleaning" was replicated for the holdout dataset. Lastly, the dataset was used to create, traine, and predicte new values using tree-based models. The tree-based models included Random Forest, XGBoost, and Decision Tree models. Herein, we report our model we trained using our "cleaned" training dataset. Once trained, we will use our model to predict holdout values and evaluate the predictive power of our overall model. Additionally, a **regularized logistic regression model** is constructed here using a **elastic net regularization** approach when training our model on the "cleaned" data. 
+
+# Read in the Data
+**Data Description**
+The dataset is very similar to previously reported datasets. However, there are new engineered features that have been added. To begin, FICO score was captured by taking the difference between the upper and lower ends fico score range, then dividing this term by 2. Next, the relationship between loan amount and installment was incorporated by dividing the installment by the loan amount. Similarly, another ratio term was created that takes into account the installment and annuanl income by dividing the installment by the annual income. The credit history expressed by days was captured by subtracting the most recent date credit was pulled by the earliest reported credit line of the borrower. Furthermore, we extracted the credit history by years through dividing the previous term by 365. 
+
+**Variable Descriptions**
+
+| **Variable**         | **Type**  | **Description**                                                                 |
+|----------------------|----------:|:--------------------------------------------------------------------------------|
+| `loan_default`           | Binary   | Whether the loan has defaulted. Values: "Yes", "No".                      |
+| `term`                   | Binary   | The number of payments on the loan (36 or 60 months).                             |
+| `grade`                  | Numeric   | Loan grade assigned by Lending Club.                            |
+| `sub_grade`              | Ordered Factor   | Loan subgrade assigned by Lending Club.                           |
+| `emp_length`             | Numeric   | Employment length in years                       |
+| `home_ownership`         | Factor   | 	Home ownership status                    |
+| `verification_status`    | Factor   | Whether income was verified               |
+| `purpose`                | Factor   | Category provided by the borrower for the loan request.    |
+| `initial_list_status`    | Factor   | Initial listing status of the loan                           |
+| `application_type`       | Factor    | Type of application |
+| `inq_last_6mths`         | Ordered Factor    | Does the customer have a securities account? (0 = No, 1 = Yes).                |
+| `acc_now_delinq`         | Ordered Factor    | Does the customer have a certificate of deposit account? (0 = No, 1 = Yes).     |
+| `loan_amnt`              | Numeric    | The listed amount of the loan applied for by the borrower.        |
+| `int_rate`               | Numeric    | Interest rate on the loan.   |
+| `dti`                    | Numeric    | Debt-to-income ratio.|
+| `pub_rec`                | Numeric    | Number of derogatory public records.             |
+| `revol_bal`              | Numeric    | Total revolving balance.    |
+| `total_acc`              | Numeric    | Total number of credit lines in the borrower’s credit file.            |
+| `mort_acc`               | Numeric    | Number of mortgage accounts.      |
+| `inq_last_6mths`.        | Numeric     |Number of credit inquiries in the past 6 months.               |
+| `pub_rec_bankruptcies`   | Numeric    | Number of public record bankruptcies.    |
+| `delinq_2yrs`            | Numeric    | Number of 30+ days delinquency incidents in past 2 years.      |
+| `mths_since_last_delinq` | Numeric    | Months since last delinquency (NA if never).    |
+| `no_delinq_flag`         | Numeric    | Whether a delinquency occured prior. |
+| `annual_inc_log`         | Numeric    | The log of the annual income.             |
+| `issue_year`             | Ordered Factor    | Number of years the loan has been issued     |
+| `loan_age_days`          | Numeric    | Number of days the loan has been issued          |
+| `fico_score`             | Numeric    | The average between the sum of the upper and lower ends of the burrow's FICO score range     |
+| `installment_to_loanamt` | Numeric    | Ratio of installment monthly payment owed by the borrower if the loan originates to loan amount |
+| `installment_to_income`  | Numeric    | Ratio of installment monthly payment owed by the borrower if the loan originates to annual income |
+| `credit_history_days`    | Numeric    | Days between most recent credit pull date and earliest credit pull date         |
+| `credit_history_years`   | Numeric    | Years between most recent credit pull date and earliest credit pull date          |
+
+In the chunk below, w read in the dataset and observe variable distribution in regards to type and all outputs given in the skim() function. 
+
+```{r}
+# train <- readRDS("3B_Palmer-Storer_train.rds")
+# hold <- readRDS("3B_Palmer-Storer_holdout.rds")
+# train <- readRDS("3B_Palmer-Storer_train_raw.rds")
+# hold <- readRDS("3B_Palmer-Storer_holdout_raw.rds")
+train <- readRDS("3B_Palmer-Storer_train_clean.rds")
+hold <- readRDS("3B_Palmer-Storer_holdout_clean.rds")
+```
+
+**Skim the data** 
+```{r}
+# skimr::skim(train)
+# skimr::skim(hold)
+```
+
+**Check for balanced loan_default in training dataset**
+```{r}
+table(train$loan_default)
+```
+
+**Check for balanced loan_default in holdout dataset**
+```{r}
+table(hold$loan_default)
+```
+# Imbalance Dataset
+## Fit a Logistic Regression Model Using Lasso Selection with caret
+### Set up a trainControl object
+```{r}
+ctrl <- trainControl(method = "cv", number = 4, 
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE, 
+                     savePredictions = "final")
+```
+- method = “cv”, number = 10: We are using 10-fold cross validation. We will use this to select our hyperparameters, 𝜆 and α. 
+- summaryFunction = twoClassSummary: This tells caret to use a custom summary function to evaluate model performance. twoClassSummary computes:
+  - ROC AUC (Area Under the Curve),
+  - Sensitivity (Recall/TPR),
+  - Specificity (TNR). Note: Your target variable must be a factor with two levels, and the positive class must be the first level of the factor when using twoClassSummary in caret. This is because twoClassSummary treats the first factor level as the positive class. Always check to make sure the first level of the target is the “success” class. You can change the order of the factor levels by reordering the labels.
+- classProbs = TRUE: This tells caret to compute predicted probabilities (not just class labels). Required for metrics like AUC, which need probabilities.
+- savePredictions = TRUE: This tells caret to save the model’s predictions on the training data.
+
+### Fit the Model
+The original parameters are commented out such that we could explore the optimal values. We first used the seq() function and got values for alpha and lambda as 0.25 and 0.001, respectively. Then, we set lambda to be 0.001 and let optimized our alpha value and got it to be 0.11111111. Finally, we optimized lambda, just to double-check, and at a set 0.11111111 alpha value, the best lambda we got was 0.001.
+```{r}
+logit_fit <- caret::train(
+  loan_default ~ ., 
+  data = train,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = expand.grid(
+    alpha = seq(0, 1, length=8),
+    lambda = seq(.001,.1, length=5)),
+  metric = "ROC",
+  family = "binomial"
+)
+```
+**Explanation of the tuneGrid argument**
+- alpha = 1: Sets the model to LASSO regression.
+- tuneGrid: This creates a grid of lambda values for cv.
+  - Small lambda → less penalty → model behaves more like plain logistic regression.
+  - Large lambda → more shrinkage → more coefficients get pushed toward zero.
+
+**Below is a graphical exploration of the model to find the optimal lambda value**
+The plot generated yields a the various ROC (Cross-Validation) values according to the regularization paramter. Thus, we can use this plot to determine our optimal regularization parameter. 
+```{r}
+plot(logit_fit)
+```
+
+This table tells us the optimal lambda and alpha values. We previously stated these values above.
+```{r}
+logit_fit$bestTune
+```
+
+Here, we see a more comprehensive examination of different alpha and lambda values corresponding to performance metrics of the model they generate. In this case, lambda and alpha were selected using the F1 score because we set the metric to F1. 
+```{r}
+logit_fit$results
+```
+
+**Below we look at the coefficients of the model**
+```{r}
+coef(logit_fit$finalModel,logit_fit$bestTune$lambda)
+```
+
+## Predict on the Test Set
+Here, we created a dataframe that includes the predictions on the test data along with the actual values. We first create the dataframe with just the loan_default response variable. Then, we do the predictions on the holdout dataset (probabilitiy and classification). Lastly, we add predictions to the dataframe. 
+
+**Predict on Holdout**
+```{r}
+hold_pred <- data.frame(
+  Predicted_Loan_Default = hold$loan_default,
+ # pred_class = predict(logit_fit, 
+  #                   newdata = hold,
+  #                   type = "raw",
+ #                    )[,"Yes"],
+  pred_prob = predict(logit_fit, 
+                      newdata = hold,
+                      type = "prob")[,"Yes"])
+hold_pred <- hold_pred %>% 
+  mutate(pred_class = factor(ifelse(hold_pred$pred_prob > 0.15, 
+                                         "Yes", "No"),
+                                  levels=c("Yes","No")))
+head(hold_pred)
+```
+
+
+## Evaluate the Model
+### Confusion Matrix
+
+```{r}
+confusionMatrix(hold_pred$pred_class, 
+                hold_pred$Predicted_Loan_Default, 
+                positive = "Yes")
+```
+
+### ROC Curve
+The generation of the ROC curve is done via the two chunks below. Additionally, the corresponding AUC and F1 value are reported below. This is only done on the holdout data. 
+
+**Compute the ROC curve**
+
+```{r}
+preds <- ROCR::prediction(hold_pred$pred_prob, hold_pred$Predicted_Loan_Default)
+perf <- ROCR::performance(preds,"tpr","fpr")
+```
+
+**Plot Curve**
+```{r}
+plot(perf, col = "blue", lwd = 2, main = "ROC Curve fo rOur Model")
+abline(a = 0, b = 1, col = "red", lty = 2, lwd = 2)
+```
+  
+**Extract AUC**
+```{r}
+auc <- ROCR::performance(preds, "auc")@y.values[[1]]
+print(paste("The AUC is ",round(auc,2)))
+```
+
+### F1 Score
+**Holdout**
+The F1 score was obtained using the F1_Score() function from the MLmetrics package. The F1 score for our model was 0.42 for imbalance data.
+```{r}
+F1 <- MLmetrics::F1_Score(y_pred = hold_pred$pred_class,
+                          y_true = hold$loan_default,
+                          positive = "Yes")
+
+
+print(paste("The F1 score is ",round(F1,2)))
+```
+
+# Balanced Dataset
+## Undersample
+Here, we undersample the data, such the the number for each class is equivalent.
+```{r}
+set.seed(123)
+maj <- train %>% dplyr::filter(loan_default == "No")
+min <- train %>% dplyr::filter(loan_default == "Yes")
+maj_under <- maj %>% dplyr::sample_n(nrow(min))
+train_us <- dplyr::bind_rows(min, maj_under) %>% dplyr::slice_sample(prop = 1)
+prop.table(table(train_us$loan_default))
+```
+
+## Fit a Logistic Regression Model Using Lasso Selection with caret
+### Set up a trainControl object
+```{r}
+ctrl <- trainControl(method = "cv", number = 4, 
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE, 
+                     savePredictions = "final")
+```
+- method = “cv”, number = 10: We are using 10-fold cross validation. We will use this to select our hyperparameters, 𝜆 and α. 
+- summaryFunction = twoClassSummary: This tells caret to use a custom summary function to evaluate model performance. twoClassSummary computes:
+  - ROC AUC (Area Under the Curve),
+  - Sensitivity (Recall/TPR),
+  - Specificity (TNR). Note: Your target variable must be a factor with two levels, and the positive class must be the first level of the factor when using twoClassSummary in caret. This is because twoClassSummary treats the first factor level as the positive class. Always check to make sure the first level of the target is the “success” class. You can change the order of the factor levels by reordering the labels.
+- classProbs = TRUE: This tells caret to compute predicted probabilities (not just class labels). Required for metrics like AUC, which need probabilities.
+- savePredictions = TRUE: This tells caret to save the model’s predictions on the training data.
+
+### Fit the Model
+We  used the seq() function to the optimal values for alpha and lambda, respectively. 
+```{r}
+logit_fit_us <- caret::train(
+  loan_default ~ ., 
+  data = train_us,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = expand.grid(
+    alpha = seq(0, 1, length=10), 
+    lambda = seq(.001,.1, length=5)), 
+  metric = "ROC",
+  family = "binomial"
+)
+```
+**Explanation of the tuneGrid argument**
+- alpha = 1: Sets the model to LASSO regression.
+- tuneGrid: This creates a grid of lambda values for cv.
+  - Small lambda → less penalty → model behaves more like plain logistic regression.
+  - Large lambda → more shrinkage → more coefficients get pushed toward zero.
+
+**Below is a graphical exploration of the model to find the optimal lambda value**
+The plot generated yields a the various ROC (Cross-Validation) values according to the regularization paramter. Thus, we can use this plot to determine our optimal regularization parameter. 
+```{r}
+plot(logit_fit_us)
+```
+
+This table tells us the optimal lambda and alpha values. We previously stated these values above.
+```{r}
+logit_fit_us$bestTune
+```
+
+Here, we see a more comprehensive examination of different alpha and lambda values corresponding to performance metrics of the model they generate. In this case, lambda and alpha were selected using the F1 score because we set the metric to F1. 
+```{r}
+logit_fit_us$results
+```
+
+**Below we look at the coefficients of the model**
+```{r}
+coef(logit_fit_us$finalModel,logit_fit_us$bestTune$lambda)
+```
+
+## Predict on the Test Set
+Here, we created dataframes that includes the predictions on the training and test data along with the actual values. We first create the dataframe with just the loan_default response variable labeled as Predicted_Loan_Defualt. Then, we do the predictions on the training and holdout datasets (probabilitiy and classification). Lastly, we add these predictions to the corresponding dataframes. 
+
+**Predict on Holdout**
+```{r}
+hold_pred_us <- data.frame(
+  Predicted_Loan_Default = hold$loan_default,
+  pred_prob = predict(logit_fit_us, 
+                      newdata = hold,
+                      type = "prob")[, "Yes"])
+hold_pred_us <- hold_pred_us %>%
+  mutate(pred_class = factor(ifelse(hold_pred_us$pred_prob > 0.45, 
+                                          "Yes", 
+                                          "No")))
+```
+
+
+## Evaluate the Model
+### Confusion Matrix
+
+```{r}
+confusionMatrix(hold_pred_us$pred_class, 
+                hold_pred_us$Predicted_Loan_Default, 
+                positive = "Yes")
+```
+
+### ROC Curve
+The generation of the ROC curve is done via the two chunks below. Additionally, the corresponding AUC and F1 value are reported below. 
+
+**Compute the ROC curve**
+```{r}
+preds_us <- ROCR::prediction(hold_pred_us$pred_prob, 
+                             hold_pred_us$Predicted_Loan_Default)
+perf_us <- ROCR::performance(preds_us, "tpr", "fpr")
+```
+
+**Plot Curve**
+```{r}
+plot(perf_us, col = "blue", lwd = 2, main = "ROC Curve fo rOur Model")
+abline(a = 0, b = 1, col = "red", lty = 2, lwd = 2)
+```
+
+**Extract AUC**
+Here, we get the auc value. 
+```{r}
+auc_us <- ROCR::performance(preds_us, "auc")@y.values[[1]]
+print(paste("The AUC is ",round(auc_us,2)))
+```
+
+### F1 Score
+```{r}
+F1_us <- MLmetrics::F1_Score(y_pred = hold_pred_us$pred_class,
+                            y_true = hold$loan_default,
+                            positive = "Yes")
+
+
+print(paste("The F1 score is ",round(F1_us,2)))
+```
+
+# Conclusion
+The undersampled and original datasets showed similar F1 scores. However, the sensitivity for the model trained using the original dataset. Thus, the better dataset would be considered to be that trained with the whole dataset because sensitivity reflects the ability of the model to capture the positive class, which in this case is significantly more influential than capturing the negative class. 
+
+**New Imbalance Dataset**
+| threshold | F1 Score |
+|-----------|----------|
+|  0.8     |  0.13    |
+|  0.7     |  0.13    |
+| 0.5      |  0.24        |
+| 0.3      |  0.43        |
+| 0.2      |  0.45        |
+| 0.15      |    0.43      |
+
+**New Imbalance Dataset**
+| threshold | F1 Score |
+|-----------|----------|
+|  0.5     |  0.45    |
+|  0.4      |  0.43    |
+| 0.3      |  0.        |
+| 0.6      |  0.45        |
+| 0.7      |  0.44        |
+| 0.8      |    0.43      |
