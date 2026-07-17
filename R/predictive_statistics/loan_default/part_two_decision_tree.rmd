@@ -1,5 +1,5 @@
 ---
-title: "Preprocessing the Data to Predict Loan Default"
+title: "Decision Tree Models For Predicting Loan Default"
 author: "storera17"
 output:
     html_document:
@@ -892,4 +892,4 @@ The best decision tree was found to be that with the highest AUC. This would be 
 ```{r}
 # Save predicted values
 saveRDS(single.tree.preds, "st.preds_clean_4.rds")
-```
+````
