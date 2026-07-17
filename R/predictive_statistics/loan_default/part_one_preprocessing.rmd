@@ -189,3 +189,699 @@ DataExplorer::plot_bar(df_cat,
                        nrow = 3)
 ```
 
+# Handling Missing Data
+
+## Tabular Summaries of Missing Values
+
+### Missing Values in Numeric Values 
+
+>  The numeric variables ‘revol_util’, ‘mort_acc’, and ‘mths_since_last_delinq’ contain missing values. The variable ‘mths_since_last_delinq’ is missing over 50% of data values. Thus, imputation will be required for this variable. The variable ‘mort_acc’ is missing a little less than 10% of data values, it will also required imputation.
+
+```{r}
+sapply(df_num, n_missing)
+```
+
+### Missing Values in Categorical Variables
+
+> The categorical variables ‘emp_title’, ‘emp_length’, ‘title’, ‘pub_rec_bankruptcies’, and ‘last_credit_pull_d’ contain missing values. No categorical variable is misisng 10% or close to 10% of its values. Thus, all categorical variables will remain unchanged.
+
+```{r}
+sapply(df_cat, n_missing)
+```
+
+## Graphical illustrations of Missing Data
+
+> The numeric and categorical variables were combined and the missing values were examined using the plot_missing() function. As stated previously, the variable ‘mths_since_last_delinq’ contains over 50% of missing values. In addition, the variable ‘mort_acc’ contains a little less than 10% of missing values.
+
+```{r} 
+df <- bind_cols(df_cat, df_num)
+plot_missing(df)
+```
+
+## Simple Imputation: Fill Numerics with medians
+
+> We decided to use a simple imputation for missing values. Ultimately, the method we chose was using the median in the place of missing values. We use the plot_missing() function to see if the missing data values are replace
+
+```{r}
+# Compute medians from TRAINING dataset
+train_medians <- sapply(df, function(x)
+  if (is.numeric(x)) median(x, na.rm = TRUE) else NA)
+
+# Impute numeric variables using training medians
+for (v in c("mort_acc", "pub_rec_bankruptcies", "revol_util")) {
+  df[[v]][is.na(df[[v]])] <- train_medians[[v]]}
+```
+
+## Flag Method 
+
+```{r}
+# Flag for mths_since_last_delinq
+df$mths_since_last_delinq[is.na(df$mths_since_last_delinq)] <- 999
+df$no_delinq_flag <- ifelse(df$mths_since_last_delinq == 999, 1, 0) # Flag that preserves info that borrower has never been deliquent (according to survey) and lets model learn from it
+```
+
+## Use Missing Level 
+
+```{r}
+# 'initial_list_status'
+df$initial_list_status <- forcats::fct_explicit_na(
+  df$initial_list_status, na_level = "Missing")
+# emp_length
+df$emp_length <- forcats::fct_explicit_na(as.factor(df$emp_length), na_level = "Missing")
+```
+
+## Plot Missing to Check
+
+```{r}
+plot_missing(df)
+```
+
+# Outlier & Anomaly Detection
+
+## Examination & Approach to Outliers
+
+> We examined potential outliers using the interquartile range method. The values reported from the code below show the number of values that are larger than the interquartile range threshold (1.5 x IQR) for each numeric variable. These values do not necessarily represent errors or anomalies. These values are a reflection of variability within the data and are logical representations of real-world finanical data. Forthwidth, it would not be an accurate model of the data if we were to remove these high values.
+
+```{r}
+iqr_check <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  sum(x < (q1 - 1.5 * iqr) | x > (q3 + 1.5 * iqr), na.rm = TRUE)
+}
+
+outlier_summary <- sapply(df_num, iqr_check)
+
+# Print summary
+outlier_summary
+```
+
+```{r}
+# Evaluate
+if (all(outlier_summary == 0)) {
+  message("No significant outliers detected based on IQR method.")
+}
+```
+
+# Data Transformation
+
+## Transforming Highly Skewed Variables
+
+> During the qualitative analysis of histograms for the numeric variables, we determined that ‘loan_amnt’, ‘installment’, ‘annual_inc’, ‘revol_bal’, ‘revol_util’, ‘dti’, and ‘mths_since_last_delinq’ would benefit from a logarithmic transformation because of being all right-skewed. This will tempor the skewed shaped of these variables and be more favorable for the model. After transforming the variables to a logarithmic scale, the skewness was reduced.
+
+```{r}
+skew_num <- c('annual_inc')
+
+for (v in skew_num) {
+  if (v %in% names(df)) {
+    df[[paste0(v, "_log")]] <- log1p(df[[v]])
+  }
+}
+
+skew_before <- sapply(df[skew_num], skewness, na.rm = TRUE)
+skew_after <- sapply(df[paste0(skew_num, "_log")], skewness, na.rm = TRUE)
+
+tibble::tibble(variable = skew_num,
+               before_skew = round(skew_before, 2),
+               after_skew = round(skew_after, 2))
+```
+
+# Dimension Reduction
+
+## Correlation Examination
+
+> The correlation heat map revealed a strong correlation between ‘loan_amnt’ with ‘installment’ and ‘fico_range_high’ with ‘fico_range_low’. In order to prevent multicolinearity, one of these variables needs to be removed from each pair. Here, we have just another way we computed a correlation matrix and found that the variables listed are highly correlated. This just further emphasizes what we explained when examining the correlation heat map previously. Start with removing the original non-transformed columns. Even removed variables are shown due to the ‘findCorrelation()’ function. This is demonstrated by previewing the first few rows.
+
+```{r}
+#remove <- c('annual_inc')
+#df <- df %>%
+#  select(-remove)
+
+num_cols <- names(df)[sapply(df, is.numeric)]
+cor_matrix <- cor(df[num_cols], use="pairwise.complete.obs")
+high_corr <- findCorrelation(cor_matrix, cutoff = 0.85, names = TRUE, exact = TRUE)
+print(high_corr)
+```
+
+## Removal of Redundancies / Irrelevant Features
+
+```{r}
+# Irrelevant Features
+df <- df %>%
+  select(-emp_title, 
+         -title, 
+#         -sub_grade, 
+         -address, 
+         -hardship_flag, 
+         -debt_settlement_flag) #%>%
+# Redundant (High correlation)
+#  select(-installment)
+```
+
+# Feature Creation
+
+## Binned Variables & Ordered Factors
+
+### Binned Variables 
+
+> The categorical variables ‘inq_last_6mths’, ‘acc_now_delinq’ need to be converted into categorical bins to capture risk tiers. These will be included in dummy encoding.
+
+```{r}
+df <- df %>%
+  mutate(
+    # Replace NA with 0 first
+    acc_now_delinq = ifelse(is.na(acc_now_delinq), 0, acc_now_delinq),
+    inq_last_6mths = ifelse(is.na(inq_last_6mths), 0, inq_last_6mths),
+
+    # Create binned versions
+    acc_now_delinq_binned = case_when(
+      acc_now_delinq == 0 ~ "0",
+      acc_now_delinq == 1 ~ "1",
+      acc_now_delinq >= 2 ~ "2 or more"
+    ),
+    inq_last_6mths_binned = case_when(
+      inq_last_6mths == 0 ~ "0",
+      inq_last_6mths == 1 ~ "1",
+      inq_last_6mths >= 2 ~ "2 or more"
+    )
+  )
+
+# Convert to ordered factors
+df$acc_now_delinq_binned <- factor(df$acc_now_delinq_binned,
+                                   levels = c("0", "1", "2 or more"),
+                                   ordered = TRUE)
+
+df$inq_last_6mths_binned <- factor(df$inq_last_6mths_binned,
+                                   levels = c("0", "1", "2 or more"),
+                                   ordered = TRUE)
+df <- df %>%
+  select(-inq_last_6mths, -acc_now_delinq)
+#df <- fastDummies::dummy_cols(df, select_columns = acc_now_delinq_binned, inq_last_6mths_binned,
+#                              remove_first_dummy=TRUE)
+```
+
+> There is one distinct category that dominates. In order to capture the possible usefulness, we decided to combine the two minor categories. If no usefulnessa is provided we can drop this variable.
+
+```{r}
+# Convert back to character
+df$application_type <- as.character(df$application_type)
+
+# Combine low count variables
+df$application_type[df$application_type %in% c("JOINT", "DIRECT_PAY")] <- "OTHER"
+
+# Convert back to factor
+df$application_type <- factor(df$application_type, levels = c("INDIVIDUAL", "OTHER"))
+```
+
+### Ordered Factors
+
+```{r}
+# Convert issue_d into issue_year and loan_age_days
+df <- df %>%
+  mutate(
+    issue_year = lubridate::year(issue_d),
+    loan_age_days = as.numeric(Sys.Date() - issue_d)
+  ) %>%
+  select(-issue_d) %>%
+  mutate(
+    issue_year = factor(issue_year,
+                        levels = sort(unique(issue_year)),
+                        ordered = TRUE)
+  )
+```
+
+```{r}
+# Define sub_grade order
+sub_levels <- c("A1","A2","A3","A4","A5",
+                "B1","B2","B3","B4","B5",
+                "C1","C2","C3","C4","C5",
+                "D1","D2","D3","D4","D5",
+                "E1","E2","E3","E4","E5",
+                "F1","F2","F3","F4","F5",
+                "G1","G2","G3","G4","G5")
+
+# Apply to hold
+df$sub_grade <- factor(df$sub_grade, levels = sub_levels, ordered = TRUE)
+df$grade <- substr(df$sub_grade, 1, 1)
+df$grade <- factor(df$grade,
+                     levels = c("A","B","C","D","E","F","G"),
+                     ordered = TRUE)
+df$sub_grade_num <- as.numeric(df$sub_grade)
+```
+
+## Ratio-Based Features
+
+```{r}
+df <- df %>%
+  mutate(
+    fico_score = (fico_range_low + fico_range_high) / 2
+  ) %>%
+  select(-fico_range_low, -fico_range_high)
+```
+
+```{r}
+df <- df %>%
+  # Engineer installment direct proportionality with annual_inc and loan_amnt
+  mutate(installment_to_income = installment / annual_inc,
+         installment_to_loanamt = installment / loan_amnt) %>%
+  
+  # Remove 'annual_inc' and 'installment'
+  select(-installment, -annual_inc)
+
+#df <- df %>%
+#  mutate(
+#    installment_to_income = log1p(installment_to_income),
+#    installment_to_loanamt = log1p(installment_to_loanamt)) %>%
+#  select(-installment_to_income, -installment_to_loanamt)
+```
+
+## Time-Based / Duration Variables
+
+```{r}
+# Convert 'earliest_cr_line' and 'last_credit_pull_d' into a numeric interval. This represents borrower history length. 
+df <- df %>%
+  mutate(
+    earliest_cr_line = as.Date(earliest_cr_line, format = "%Y-%m-%d"),
+    last_credit_pull_d = as.Date(last_credit_pull_d, format = "%Y-%m-%d"),
+    credit_history_days = as.numeric(difftime(last_credit_pull_d, earliest_cr_line, units = "days"))) %>%
+# Remove original components
+  select(-last_credit_pull_d, -earliest_cr_line)
+```
+
+# Final Checks
+
+## Count Missing
+
+```{r}
+colSums(is.na(df))
+```
+
+> We located missing data in the variable ‘credit_history_days’ and decided to impute it.
+
+```{r}
+# compute median from training dataset
+training_credit_median <- median(df$credit_history_days, na.rm = TRUE)
+
+# apply training median to training set
+df <- df %>%
+  mutate(
+    credit_history_days = ifelse(
+      is.na(credit_history_days),
+      training_credit_median,
+      credit_history_days))
+```
+
+## Confirm No Missing Data
+
+```{r}
+colSums(is.na(df))
+```
+
+```{r}
+# Examine dataset
+str(df)
+```
+
+```{r}
+skimr::skim(df)
+```
+
+## Save Data - RDS File 
+
+```{r}
+saveRDS(df, file = 'storera17_train.rds')
+```
+
+# Holdout Preprocessing
+
+## Initials 
+
+```{r}
+# Load data
+hold_raw <- read_csv("holdout.csv", show_col_types = FALSE)
+
+# Change response variable to classification
+hold_raw <- hold_raw %>%
+  mutate(loan_default=factor(loan_default, levels=c("No","Yes")))
+
+# Preview data
+str(hold_raw)
+```
+
+## Numeric Processing 
+
+```{r}
+# Select only numeric variables
+hold_num <- hold_raw %>%
+  dplyr::select(where(is.numeric))
+
+# Convert numeric variables into factors
+hold_raw$inq_last_6mths <- as.factor(hold_raw$inq_last_6mths)
+hold_raw$acc_now_delinq <- as.factor(hold_raw$acc_now_delinq)
+
+# Remove non-numeric variables form numerics
+hold_num <- hold_num %>%
+  select(-inq_last_6mths,
+         -acc_now_delinq)
+```
+
+## Categorical Processing
+
+```{r}
+# Select only categorical variables
+hold_cat <- hold_raw %>%
+  dplyr::select(where(\(x) is.character(x) || is.factor(x)))
+
+# Convert applicable character variables to dates
+hold_cat <- hold_cat %>%
+  mutate(issue_d = lubridate::my(issue_d),
+    earliest_cr_line = lubridate::my(earliest_cr_line),
+    last_credit_pull_d = lubridate::my(last_credit_pull_d)
+  )
+
+# Convert character variables to factors
+hold_cat <- hold_cat %>%
+  mutate(term=factor(term, levels=c("36 months", "60 months")),
+          initial_list_status=factor(initial_list_status, levels="f", "w"))
+hold_cat$emp_length <- as.factor(hold_cat$emp_length)
+hold_cat$home_ownership <- as.factor(hold_cat$home_ownership)
+hold_cat$verification_status <- as.factor(hold_cat$verification_status)
+hold_cat$purpose <- as.factor(hold_cat$purpose)
+hold_cat$initial_list_status <- as.factor(hold_cat$initial_list_status)
+hold_cat$application_type <- as.factor(hold_cat$application_type)
+```
+
+## Data Summary
+
+```{r} 
+# Data summary of numerics
+skimr::skim(hold_num)
+
+# Data summary of categoricals
+skimr::skim(hold_cat)
+```
+
+## Data Visualization
+
+```{r}
+# Numeric frequency figures (histograms)
+DataExplorer::plot_histogram(hold_num,
+                             ggtheme = theme_minimal(),
+                             ncol = 3,
+                             nrow = 3)
+
+# Numeric boxplots
+hold_num_targ <- hold_num %>%
+  mutate(loan_default = hold_raw$loan_default)
+DataExplorer::plot_boxplot(
+  hold_num_targ,
+  by = "loan_default",
+  ggtheme = theme_minimal(),
+  ncol = 3,
+  nrow = 3)
+
+# Numeric correlation using heat map
+DataExplorer::plot_correlation(hold_num,
+                               type="continuous",
+                               cor_args = list("use" = "pairwise.complete.obs")
+                              )
+
+# Categorical bar charts
+DataExplorer::plot_bar(hold_cat,
+                       ggtheme = theme_minimal(),
+                       ncol = 3,
+                       nrow = 3)
+```
+
+## Combine Numerics with categoricals
+
+```{r}
+hold <- bind_cols(hold_cat, hold_num)
+```
+
+# Handling Missing Data
+
+## Evaluation of Missingness
+
+```{r}
+# Tabular missing data summary
+colSums(is.na(hold))
+
+# Graphical missing data summary
+plot_missing(hold)
+```
+
+## Imputation
+
+### Median Imputation Method
+
+```{r}
+# perform variable imputation
+for (v in c("mort_acc", "pub_rec_bankruptcies", "revol_util")) {
+  # Holdout data (use training medians)
+  hold[[v]][is.na(hold[[v]])] <- train_medians[[v]]
+}
+```
+
+### Flag Method
+
+```{r}
+# Flag for mths_since_last_delinq
+hold$mths_since_last_delinq[is.na(hold$mths_since_last_delinq)] <- 999
+hold$no_delinq_flag <- ifelse(hold$mths_since_last_delinq == 999, 1, 0) # Flag that preserves info that borrower has never been deliquent (according to survey) and lets model learn from it
+```
+
+### Use Missing Level 
+
+```{r}
+# 'initial_list_status'
+hold$initial_list_status <- forcats::fct_explicit_na(
+  hold$initial_list_status, na_level = "Missing")
+# emp_length
+hold$emp_length <- forcats::fct_explicit_na(as.factor(hold$emp_length), na_level = "Missing")
+```
+
+### Plot Missing to Check
+
+```{r}
+plot_missing(hold)
+```
+
+## Outlier & Anomaly Detection
+
+```{r}
+hold_iqr_check <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  sum(x < (q1 - 1.5 * iqr) | x > (q3 + 1.5 * iqr), na.rm = TRUE)
+}
+
+hold_outlier_summary <- sapply(hold_num, hold_iqr_check)
+
+# Print summary
+hold_outlier_summary
+
+# Evaluate
+if (all(hold_outlier_summary == 0)) {
+  message("No significant outliers detected based on IQR method.")
+}
+```
+
+## Data Transfotmation
+
+```{r}
+hold_skew_num <- c('annual_inc')
+
+for (v in hold_skew_num) {
+  if (v %in% names(hold)) {
+    hold[[paste0(v, "_log")]] <- log1p(hold[[v]])
+  }
+}
+
+hold_skew_before <- sapply(hold[hold_skew_num], skewness, na.rm = TRUE)
+hold_skew_after <- sapply(hold[paste0(hold_skew_num, "_log")], skewness, na.rm = TRUE)
+
+tibble::tibble(variable = hold_skew_num,
+               hold_before_skew = round(hold_skew_before, 2),
+               hold_after_skew = round(hold_skew_after, 2))
+```
+
+## Dimension Reduction
+
+```{r}
+#hold_remove <- c('annual_inc')
+#hold <- hold %>%
+#  select(-hold_remove)
+
+hold_num_cols <- names(hold)[sapply(hold, is.numeric)]
+hold_cor_matrix <- cor(hold[hold_num_cols], use="pairwise.complete.obs")
+hold_high_corr <- findCorrelation(hold_cor_matrix, cutoff = 0.85, names = TRUE, exact = TRUE)
+print(hold_high_corr)
+```
+
+## Removal of Redundancie / Irrelevant Features
+
+
+```{r}
+# Irrelevant Features
+hold <- hold %>%
+  select(-emp_title,
+         -title, 
+#         -sub_grade, 
+         -address, 
+         -hardship_flag, 
+         -debt_settlement_flag)  #%>%
+# Redundant (High correlation)
+#  select(-installment)
+```
+
+## Feature Creation
+
+### Binned variables and ordered factors
+```{r}
+hold <- hold %>%
+  mutate(
+    # Replace NA with 0 first
+    acc_now_delinq = ifelse(is.na(acc_now_delinq), 0, acc_now_delinq),
+    inq_last_6mths = ifelse(is.na(inq_last_6mths), 0, inq_last_6mths),
+
+    # Create binned versions
+    acc_now_delinq_binned = case_when(
+      acc_now_delinq == 0 ~ "0",
+      acc_now_delinq == 1 ~ "1",
+      acc_now_delinq >= 2 ~ "2 or more"
+    ),
+    inq_last_6mths_binned = case_when(
+      inq_last_6mths == 0 ~ "0",
+      inq_last_6mths == 1 ~ "1",
+      inq_last_6mths >= 2 ~ "2 or more"
+    )
+  )
+
+# Convert to ordered factors
+hold$acc_now_delinq_binned <- factor(hold$acc_now_delinq_binned,
+                                   levels = c("0", "1", "2 or more"),
+                                   ordered = TRUE)
+
+hold$inq_last_6mths_binned <- factor(hold$inq_last_6mths_binned,
+                                   levels = c("0", "1", "2 or more"),
+                                   ordered = TRUE)
+# Remove original variables
+hold <- hold %>%
+  select(-inq_last_6mths, -acc_now_delinq)
+
+# Convert back to character
+hold$application_type <- as.character(hold$application_type)
+
+# Combine low count variables
+hold$application_type[hold$application_type %in% c("JOINT", "DIRECT_PAY")] <- "OTHER"
+
+# Convert back to factor
+hold$application_type <- factor(hold$application_type, levels = c("INDIVIDUAL", "OTHER"))
+
+hold$home_ownership <- fct_collapse(hold$home_ownership,
+                                        OTHER = c("OTHER", "ANY"))
+
+# Convert issue_d into issue_year and loan_age_days
+hold <- hold %>%
+  mutate(
+    issue_year = lubridate::year(issue_d),
+    loan_age_days = as.numeric(Sys.Date() - issue_d)
+  ) %>%
+  select(-issue_d) %>%
+  mutate(
+    issue_year = factor(issue_year,
+                        levels = sort(unique(issue_year)),
+                        ordered = TRUE)
+  )
+
+# Define sub_grade order
+sub_levels <- c("A1","A2","A3","A4","A5",
+                "B1","B2","B3","B4","B5",
+                "C1","C2","C3","C4","C5",
+                "D1","D2","D3","D4","D5",
+                "E1","E2","E3","E4","E5",
+                "F1","F2","F3","F4","F5",
+                "G1","G2","G3","G4","G5")
+
+# Apply to hold
+hold$sub_grade <- factor(hold$sub_grade, levels = sub_levels, ordered = TRUE)
+hold$grade <- substr(hold$sub_grade, 1, 1)
+hold$grade <- factor(hold$grade,
+                     levels = c("A","B","C","D","E","F","G"),
+                     ordered = TRUE)
+hold$sub_grade_num <- as.numeric(hold$sub_grade)
+```
+
+### Ratio-Based Features
+
+```{r}
+hold <- hold %>%
+  mutate(
+    fico_score = (fico_range_low + fico_range_high) / 2
+  ) %>%
+  select(-fico_range_low, -fico_range_high)
+
+hold <- hold %>%
+  # Engineer installment direct proportionality with annual_inc and loan_amnt
+  mutate(installment_to_income = installment / annual_inc,
+         installment_to_loanamt = installment / loan_amnt) %>%
+  
+  # Remove 'annual_inc' and 'installment'
+  select(-installment, -annual_inc)
+
+#hold <- hold %>%
+#  mutate(
+#    installment_to_income = log1p(installment_to_income),
+#    installment_to_loanamt = log1p(installment_to_loanamt)) %>%
+#  select(-installment_to_income, -installment_to_loanamt)
+```
+
+### Time-Based / Duration Variables
+
+```{r}
+# Convert 'earliest_cr_line' and 'last_credit_pull_d' into a numeric interval. This represents borrower history length. 
+hold <- hold %>%
+  mutate(
+    earliest_cr_line = as.Date(earliest_cr_line, format = "%Y-%m-%d"),
+    last_credit_pull_d = as.Date(last_credit_pull_d, format = "%Y-%m-%d"),
+    credit_history_days = as.numeric(difftime(last_credit_pull_d, earliest_cr_line, units = "days"))) %>%
+# Remove original components
+  select(-last_credit_pull_d, -earliest_cr_line)
+```
+
+## Last Checks
+
+### Count Missing
+
+```{r}
+colSums(is.na(hold))
+```
+
+> Impute for missing values (use training imputation)
+
+```{r}
+hold <- hold %>%
+  mutate(
+    credit_history_days = ifelse(
+      is.na(credit_history_days),
+      training_credit_median,
+      credit_history_days))
+```
+
+```{r}
+# Confirm no missing data
+colSums(is.na(hold))
+
+# Examine dataset
+str(hold)
+
+skimr::skim(hold)
+```
+
+## Save Data
+
+```{r}
+saveRDS(hold, file = 'storera17_holdout.rds')
+```
