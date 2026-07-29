@@ -164,3 +164,11 @@ str(df_raw)
 df_raw <- df_raw %>%
   mutate(loan_default=factor(loan_default, levels=c("No","Yes")))
 ```
+
+---
+
+# Sample 
+
+> No sampling required, the dataset was not large enough.
+
+---
