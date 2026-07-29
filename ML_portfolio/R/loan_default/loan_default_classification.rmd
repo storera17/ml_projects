@@ -49,7 +49,10 @@ output:
         fig_caption: true
         keep_tex: false
 
-
+    word_document:
+        toc: true
+        toc_depth: 3
+        fig_caption: true
+        reference_docx: "template.docx"
  
-
 ---
