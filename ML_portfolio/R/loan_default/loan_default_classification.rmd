@@ -92,6 +92,7 @@ pacman::p_load(mlba,tidyverse)
 ```
 
 ---
+
 # Defining the Project
 
 ## The Objective
@@ -143,3 +144,23 @@ The objective of the project is to optimize F1 score.
 Predictions for loan default.
 
 ---
+
+# Obtain Data
+
+## Load the Data
+
+```{r}
+df_raw <- read_csv("train.csv", show_col_types = FALSE)
+```
+
+## Preview data
+
+```{r}
+str(df_raw)
+```
+
+## Convert Response Variable to Factor
+```{r}
+df_raw <- df_raw %>%
+  mutate(loan_default=factor(loan_default, levels=c("No","Yes")))
+```
