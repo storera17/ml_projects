@@ -55,4 +55,24 @@ output:
         fig_caption: true
         reference_docx: "template.docx"
  
+ params:
+    company_name: "loan default company name goes here"
+    years_covered: "Min_Year - Max_Year"
+    currency: "USD"
+    include_apendix: true
+    min_tdc_threshold: 1000000
+    analysis_date: !r Sys.Date()
+
+bibliography: references.bib
+csl: apa.csl
+link-citations: true
+
+always_allow_html: true
+editor_options:
+    chunk_output_type: console
+    markdown:
+        wrap: 72
+    
+knit: "rmarkdown::render"
 ---
+
