@@ -1,15 +1,55 @@
-<div
-     style="padding: 10px;
-            color: white;
-            font-size: 250%;
-            text-align: center;
-            display: fill;
-            border-radius: 5px;
-            background-color: #f22a06e1;
-            overflow: hidden;
-            font-weight: 700;
-            border: 5px solid #acacac;"
-     >
-Binary Classification of Loan Default Using Machine Learning
-</div>
+---
+title: "Binary Classification of Loan Default Using Machine Learning"
+author:
+    - name: "storeraa17"
+      affiliation: "n/a"
+      email: "storera@miamioh.edu"
+data: "`r format(Sys.Date(), '%B %d, %Y')`"
 
+abstract: | 
+    Abstract 
+    will 
+    go 
+    right
+    here
+    and
+    include
+    data
+    and 
+    the
+    purpose 
+    of 
+    this
+
+keywords:
+    - examples of keywords
+
+output:
+    html_document:
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        number_sections: true
+        theme: flatly
+        highlight: tango
+        code_folding: hide
+        df_print: paged
+        fig_width: 8
+        fig_height: 5
+        fig_caption: true
+        self_contained: true
+
+    pdf_document:
+        toc: true
+        toc_depth: 3
+        number_sections: true
+        latex_engine: xelatex
+        fig_width: 8
+        fig_height: 5
+        fig_caption: true
+        keep_tex: false
+
+
+ 
+
+---
