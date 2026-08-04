@@ -1075,42 +1075,42 @@ It was assumed that data leakage was not a potential problem. However, this will
 ### Character-to-Factor Conversion
 _____________________________________________________________________________________________________________
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 ### Character-to-Numeric Conversion
 _____________________________________________________________________________________________________________
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 ### Character-to-Date Conversion
 _____________________________________________________________________________________________________________
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 ### Missing Value Treatment
 _____________________________________________________________________________________________________________
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 ### Handling Rare or Sparse Categories
 _____________________________________________________________________________________________________________
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 ### Removing Unnecessary Variables
 _____________________________________________________________________________________________________________
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
@@ -1120,37 +1120,37 @@ ________________________________________________________________________________
 
 #### Character-to-Factor Conversion
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 #### Character-to-Numeric Conversion
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 #### Character-to-Date Conversion
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 #### Missing Value Treatment
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 #### Handling Rare or Sparse Categories
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
 #### Removing Unnecessary Variables
 
-```{r data processing}
+```{r data preprocessing}
 
 ```
 
@@ -1176,7 +1176,7 @@ The variables `grade_score` and `sub_grade_score` translate lender risk grades i
 ### Employment Length Features
 _____________________________________________________________________________________________________________
 
-
+The variable `emp_length_numeric` converts employment length into an approximate numeric tenure measure. This preserves the ordered nature of employment history while avoiding many separate employment-length dummy variables.
 
 #### Training Dataset
 
@@ -1193,7 +1193,7 @@ ________________________________________________________________________________
 ### Sparse Count Binning
 _____________________________________________________________________________________________________________
 
-
+Sparse count variables such as public records, bankruptcies, recent inquiries, and delinquencies are grouped into categories. The bins `0`, `1`, and `2+` are easier to interpret and more stable than rare exact counts.
 
 #### Training Dataset
 
@@ -1207,11 +1207,10 @@ ________________________________________________________________________________
 
 ```
 
-
 ### Credit History Features
 _____________________________________________________________________________________________________________
 
-
+The variable `fico_score` combines the lower and upper FICO range bounds into an approximate average score. `credit_history_years` measures the length of credit history between the earliest credit line and loan issue date.
 
 #### Training Dataset
 
@@ -1228,7 +1227,7 @@ ________________________________________________________________________________
 ### Date-Based Features
 _____________________________________________________________________________________________________________
 
-
+Date fields are used to create duration variables instead of being passed directly into models. Duration features are more interpretable and easier for many models to use.
 
 #### Training Dataset
 
@@ -1262,7 +1261,7 @@ skimr::skim(train_raw)
 ## *Re-Assignment*
 ____________________________________________________________________________________________________________
 
-Since the datasets are "cleaned", the `raw` denotion is removed. 
+Since the datasets are "cleaned", the `raw` denotion is removed.
 
 ```{r assign}
 # TRAINING DATASET RE-ASSIGNMENT
