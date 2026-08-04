@@ -808,6 +808,42 @@ for (col in names(hold_categorical_vars)) {
 }
 ```
 
+## *Data Quality Assessment*
+
+### Missing Value Counts
+____________________________________________________________________________________________________________
+
+The presence of missing values in the training and holdout datasets was examined using the `sapply()` function to apply the `n_missing()` function to each variable. The `n_missing()` function counts the number of missing values in a variable. The results were then presented in a table format for easy interpretation.
+
+#### Missing Values in the Training Dataset
+
+```{r dqa}
+sapply(train_raw, n_missing)
+```
+
+#### Missing Values in the Holdout Dataset
+
+```{r dqa}
+sapply(hold_raw, n_missing)
+```
+
+### Missing Value Plots
+____________________________________________________________________________________________________________
+
+The missing values in the training and holdout datasets were visualized using the `plot_missing()` function from the `DataExplorer` package. This function creates a plot that shows the proportion of missing values for each variable in the dataset. The plots were customized using the `ggtheme` argument to apply a specific theme and appearance. The percentage of missing values for each variable is displayed on the y-axis, while the variable names are displayed on the x-axis. The plots provide a visual representation of the extent of missing data in the datasets, which can inform decisions regarding data cleaning and preprocessing.
+
+#### Missing Value Plots in the Training Dataset
+
+```{r dqa}
+DataExplorer::plot_missing(train_raw, ggtheme = theme_bw(base_size = 14))
+```
+
+#### Missing Value Plots in the Holdout Dataset
+
+```{r dqa}
+DataExplorer::plot_missing(hold_raw, ggtheme = theme_bw(base_size = 14))
+``` 
+
 ---
 
 # **Results**
