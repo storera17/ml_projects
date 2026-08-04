@@ -156,7 +156,7 @@ The variables found in `train.csv` and `holdout.csv` are described in the data d
 
 The datasets, `train.csv` and `holdout.csv`, were loaded and the target variable. `loan_default`, was immediately converted into a factor.
 
-```{r}
+```{r data loading}
 # TRAINING DATASET
 train_raw <- readr::read_csv(
   file.path(project_dir, "train.csv"),
@@ -169,9 +169,27 @@ hold_raw <- readr::read_csv(
   show_col_types = FALSE) %>%
   mutate(loan_default = factor(loan_default, levels = c("No", "Yes")))
 ```
+## *Previewing Dataset Structure*
+
+The structure of the datasets were assessed using the `str()` function. Subsequent previewing of the datasets was done through the utilization of the `head()` function, which shows the first few rows of a dataset.
+
+```{r data inspection}
+str(train_raw)
+```
+
+```{r data inspection}
+str(hold_raw)
+```
+
+```{r data inspection}
+head(train_raw)
+```
+
+```{r data inspection}
+head(hold_raw)
+```
 
 ## *Data Processing, Cleaning, & Exploratory Data Analysis*
-## *Data Dictionary*
 
 
 
