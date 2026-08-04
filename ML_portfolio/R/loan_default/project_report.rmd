@@ -96,3 +96,89 @@ set.seed(123)
 project_dir <- "ML_portfolio/R/loan_default/data"
 ```
 
+# **Introduction**
+
+The purpose of this project is to support better loan risk assessment. A reliable default prediction model can help lenders make more informed decisions, reduce financial losses, and improve consistency in loan evaluation. Rather than relying only on manual review or a limited set of business rules, a predictive model can evaluate many borrower and loan characteristics at the same time. Thus, the baility to predict loan default is a critical problem. For example, financial analysts may need to estimate the risk that a borrow will fail to repay a loan. When a loan is issued, the lender accepts financial risk based on information about the borrower, the loan terms, credit history, income, debt obligations, and application characteristics. If risk is underestimated, the lender may approve loans that are more likely to default. If risk is overestimated, the lender may reject borrowers who could have successfully repaid their loans.  Herein, we report a machine learning model used for predictive binary classification of loan default.
+
+The machine learning model used to evaluated will be subjected to several inputs to supply the desired loan default classification output. The make-up inputs cover several important features to consider, such as borrow information, loan terms, finances, credit history, accounting, delinquencies, administration, and status variables. The data representing these variables is split into two datasets:
+
+1. `train.csv`
+2. 'holdout.csv`
+
+The dataset 'train.csv` represents the training data and will be the dataset used for model learning. While, `holdout.csv` will be the dataset that the model is evaluated on. The evaluation of the `holdout.csv` dataset will be done on the premise of F1 score primarily. However, F1 score is not exclusively the only metric used to determine model performance. Secondary evaluation metrics used to examine model performance include accuracy, balanced accuracy, recall/sensitivity, precision, number of false positives, number of false negatives, and AUC of an ROC curve.
+
+These performance metrics will be used to evaluate decision trees, tree ensembles, logistic regression, and neural network models. The constructions of these models can be for in the `model` folder. Nevertheless, the best resulting models, based on F1 score, will be imported and model performances will be compared to determine the optimal model.
+
+The variables found in `train.csv` and `holdout.csv` are described in the data dictionary below:
+
+| Variable | Type | Description |
+|:---|:---|:---|
+| `loan_default` | Categorical | Indicates whether the borrower defaulted. Values are `Yes` and `No`. |
+| `emp_title` | Categorical / text | Borrower's reported job title. High-cardinality text variable. |
+| `emp_length` | Categorical / ordinal | Borrower's reported employment length. |
+| `home_ownership` | Categorical | Borrower's home ownership status. |
+| `annual_inc` | Numeric | Borrower's self-reported annual income. |
+| `verification_status` | Categorical | Whether income or financial information was verified. |
+| `address` | Categorical / text | Borrower's recorded address. High-cardinality text variable. |
+| `loan_amnt` | Numeric | Original loan principal amount. |
+| `term` | Categorical | Scheduled repayment length, generally 36 or 60 months. |
+| `int_rate` | Numeric | Annual interest rate assigned to the loan. |
+| `installment` | Numeric | Scheduled monthly payment. |
+| `grade` | Categorical / ordinal | Broad lender-assigned credit grade. |
+| `sub_grade` | Categorical / ordinal | More detailed credit grade. |
+| `purpose` | Categorical | Borrower's stated loan purpose. |
+| `title` | Categorical / text | Borrower-provided title for the loan request. |
+| `dti` | Numeric | Debt-to-income ratio. |
+| `earliest_cr_line` | Date-like character | Date of borrower's earliest reported credit line. |
+| `fico_range_low` | Numeric | Lower bound of reported FICO range. |
+| `fico_range_high` | Numeric | Upper bound of reported FICO range. |
+| `inq_last_6mths` | Numeric | Number of credit inquiries in the last six months. |
+| `mths_since_last_delinq` | Numeric | Months since most recent delinquency. Missing values may indicate no prior delinquency or unavailable information. |
+| `last_credit_pull_d` | Date-like character | Most recent credit pull date. |
+| `open_acc` | Numeric | Number of open credit accounts. |
+| `pub_rec` | Numeric | Number of derogatory public records. |
+| `revol_bal` | Numeric | Total revolving balance. |
+| `revol_util` | Numeric | Revolving credit utilization rate. |
+| `total_acc` | Numeric | Total number of credit accounts. |
+| `mort_acc` | Numeric | Number of mortgage accounts. |
+| `pub_rec_bankruptcies` | Numeric | Number of public-record bankruptcies. |
+| `delinq_2yrs` | Numeric | Number of delinquency incidents in the last two years. |
+| `acc_now_delinq` | Numeric | Number of accounts currently delinquent. |
+| `issue_d` | Date-like character | Month and year the loan was issued. |
+| `initial_list_status` | Categorical | Initial listing status assigned to the loan. |
+| `application_type` | Categorical | Individual, joint, or direct-pay application type. |
+| `hardship_flag` | Categorical | Indicates hardship arrangement status. |
+| `debt_settlement_flag` | Categorical | Indicates debt-settlement status. |
+
+# **Methods**
+
+## *Data Loading*
+
+The datasets, `train.csv` and `holdout.csv`, were loaded and the target variable. `loan_default`, was immediately converted into a factor.
+
+```{r}
+# TRAINING DATASET
+train_raw <- readr::read_csv(
+  file.path(project_dir, "train.csv"),
+  show_col_types = FALSE) %>%
+  mutate(loan_default = factor(loan_default, levels = c("No", "Yes")))
+
+# HOLDOUT DATASET
+hold_raw <- readr::read_csv(
+  file.path(project_dir, "holdout.csv"),
+  show_col_types = FALSE) %>%
+  mutate(loan_default = factor(loan_default, levels = c("No", "Yes")))
+```
+
+## *Data Processing, Cleaning, & Exploratory Data Analysis*
+## *Data Dictionary*
+
+
+
+# **Results**
+
+# **Discussion**
+
+# **Conclusion**
+
+# **References**
