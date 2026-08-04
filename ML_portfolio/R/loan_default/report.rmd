@@ -499,6 +499,49 @@ DataExplorer::plot_density(
 )
 ```
 
+### Numeric Variable Distributions - Heat Map
+____________________________________________________________________________________________________________
+
+#### Correlation Heat Map of Numeric Variables in the Training Dataset
+
+```{r data processing}
+DataExplorer::plot_correlation(
+  train_raw %>% select(all_of(numeric_vars)),
+  ggtheme =
+    theme_bw(base_size = 13) +
+    theme(
+      strip.background = element_rect(fill = "#1F77B4"),
+      strip.text = element_text(color = "white", face = "bold"),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(color = "grey90")
+    ),
+  cor_args = list(
+    use = "pairwise.complete.obs",
+    method = "pearson"
+  )
+)
+```
+
+#### Correlation Heat Map of Numeric Variables in the Holdout Dataset
+
+```{r data processing}
+DataExplorer::plot_correlation(
+  hold_raw %>% select(all_of(hold_numeric_vars)),
+  ggtheme =
+    theme_bw(base_size = 13) +
+    theme(
+      strip.background = element_rect(fill = "#a3231e"),
+      strip.text = element_text(color = "white", face = "bold"),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(color = "grey90")
+    ),
+  cor_args = list(
+    use = "pairwise.complete.obs",
+    method = "pearson"
+  )
+)
+```
+
 ### Categorical Variable Distributions
 ____________________________________________________________________________________________________________
 
