@@ -844,6 +844,36 @@ DataExplorer::plot_missing(train_raw, ggtheme = theme_bw(base_size = 14))
 DataExplorer::plot_missing(hold_raw, ggtheme = theme_bw(base_size = 14))
 ``` 
 
+### Anomalic Value Detection
+____________________________________________________________________________________________________________
+
+The strategy employed to detect anomalic values in the numeric variables of the training and holdout datasets was based on the interquartile range (IQR) method. The IQR is a measure of statistical dispersion, which is the difference between the third quartile (Q3) and the first quartile (Q1). Anomalic values, or outliers, were identified as any data points that fall below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR. The `boxplot.stats()` function was used to calculate the IQR and identify outliers for each numeric variable in both datasets. The results were then printed for each variable that contained anomalic values.
+
+#### Anomalic Values in the Training Dataset
+
+```{r dqa}
+for (col in names(numeric_vars)) {
+    outliers <- boxplot.stats(train_raw[[col]])$out
+    if (length(outliers) > 0) {
+        print(paste("Anomalic values in", col, "in Training Dataset:"))
+        print(outliers)
+    }
+}
+```
+
+#### Anomalic Values in the Holdout Dataset
+
+```{r dqa}
+for (col in names(hold_numeric_vars)) {
+    outliers <- boxplot.stats(hold_raw[[col]])$out
+    if (length(outliers) > 0) {
+        print(paste("Anomalic values in", col, "in Holdout Dataset:"))
+        print(outliers)
+    }
+}
+```
+
+
 ---
 
 # **Results**
