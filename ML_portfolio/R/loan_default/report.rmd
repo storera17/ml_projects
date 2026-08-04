@@ -1329,22 +1329,49 @@ ________________________________________________________________________________
 
 
 
-### Analysis
+### Evaluation
 ____________________________________________________________________________________________________________
-
-
-#### Threshold Optimization
-
-
-
-### Model Tuning Approach
-
-
 
 
 ---
 
 # **Results**
+
+
+## *Model Comparison*
+
+**Table 1.** A table showing the best model-type for each different model variants considered and corresponding evaluation metrics, such as F1 score, accuracy, precision, balanced accuracy, sensitivity/recall, and AUC.
+
+| **Model Type** | **Model Parameters** | **Sample** | **F1 Score** | **AUC** | **Accuracy** | **Balanced Accuracy** | **Precision** | **Sensitivity/Recall** |
+|:---------------|:---------------------|:-----------|:-------------|:--------|:-------------|:---------------------|:---------------|:-----------------------|
+| dtc (gini)     |      | None |       |       |      |       |       |       |
+| dtc (entropy)  |      |  None     |       |       |      |       |       |       |
+| prunned dtc (gini) |      |  None     |       |       |      |       |       |       |
+| prunned dtc (entropy) |      |   None    |       |       |      |       |       |       |
+| cv dtc (gini) |      |    None   |       |       |      |       |       |       |
+| cv dtc (entropy) |      |   None    |       |       |      |       |       |       |
+| rf  |      |  None     |       |       |      |       |       |       |
+| rf (cv) |      |    None   |       |       |      |       |       |       |
+| logistic regression (L1)|      |  None     |       |       |      |       |       |       |
+| logistic regression (L2)|      |   None    |       |       |      |       |       |       |
+| logistic regression (Elastic Net) |       |   None   |       |       |       |      |       |       |       |
+| Neural Network (rf variable selection) |        | None     |       |       |       |      |       |       |       |
+| Neural Network (logistic regression variable selection) |      | None     |       |       |       |      |       |       |       |
+| dtc (gini)     |      | Balanced |       |       |      |       |       |       |
+| dtc (entropy)  |      |  Balanced     |       |       |      |       |       |       |
+| prunned dtc (gini) |      |  Balanced     |       |       |      |       |       |       |
+| prunned dtc (entropy) |      |   Balanced    |       |       |      |       |       |       |
+| cv dtc (gini) |      |    Balanced   |       |       |      |       |       |       |
+| cv dtc (entropy) |      |   Balanced    |       |       |      |       |       |       |
+| rf  |      |  Balanced     |       |       |      |       |       |       |
+| rf (cv) |      |    Balanced   |       |       |      |       |       |       |
+| logistic regression (L1)|      |  Balanced     |       |       |      |       |       |       |
+| logistic regression (L2)|      |   Balanced    |       |       |      |       |       |       |
+| logistic regression (Elastic Net) |       |   Balanced   |       |       |       |      |       |       |       |
+| Neural Network (rf variable selection) |        | Balanced     |       |       |       |      |       |       |       |
+| Neural Network (logistic regression variable selection) |      | Balanced     |       |       |       |      |       |       |       |
+
+
 
 ---
 
