@@ -236,14 +236,14 @@ class_comparison <- tibble::tibble(
 class_comparison
 ```
 
-## *Data Summaries & Visualizations*
+## *Summary Statistics*
 
 ### Summary Statistics
 ____________________________________________________________________________________________________________
 
 The summary statistics of the datasets were examined using the `skimr::skim()` function. This function provides a comprehensive overview of the data, including the number of missing values, mean, median, standard deviation, and other relevant statistics for each variable.
 
-```{r data processing}
+```{r data }
 skimr::skim(train_raw)
 ```
 
@@ -251,12 +251,14 @@ skimr::skim(train_raw)
 skimr::skim(hold_raw)
 ```
 
+## *Data Visualization**
+
 ### Grouping Numeric Variables
 ____________________________________________________________________________________________________________
 
 The numeric variables in the training dataset were identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for numeric variables. The names of these numeric variables were then extracted using the `names()` function.
 
-```{r data processing}
+```{r data visualization}
 numeric_vars <- train_raw %>%
   select(where(is.numeric)) %>%
   names()
@@ -266,7 +268,7 @@ numeric_vars
 
 The numeric variables in the holdout dataset were also identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for numeric variables. The names of these numeric variables were then extracted using the `names()` function.
 
-```{r data processing}
+```{r data visualization}
 hold_numeric_vars <- hold_raw %>%
   select(where(is.numeric)) %>%
   names()
@@ -279,7 +281,7 @@ ________________________________________________________________________________
 
 The categorical variables in the training dataset were identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for character or factor variables. The names of these categorical variables were then extracted using the `names()` function.
 
-```{r data processing}
+```{r data visualization}
 categorical_vars <- train_raw %>%
   select(where(~ is.character(.x) || is.factor(.x))) %>%
   names()
@@ -289,7 +291,7 @@ categorical_vars
 
 The categorical variables in the holdout dataset were also identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for character or factor variables. The names of these categorical variables were then extracted using the `names()` function.
 
-```{r data processing}
+```{r data visualization}
 hold_categorical_vars <- hold_raw %>%
   select(where(~ is.character(.x) || is.factor(.x))) %>%
   names()
@@ -304,17 +306,17 @@ ________________________________________________________________________________
 
 The distribution of the target variable, `loan_default`, in the training dataset was examined using the `table()` function to count the occurrences of each class, and the `prop.table()` function to calculate the proportions. The results were then visualized using a bar plot created with the `ggplot2` package.
 
-```{r data processing}
+```{r data visualization}
 train_target_distribution <- table(train_raw$loan_default)
 train_target_proportions <- prop.table(train_target_distribution)
 ```
 
-```{r data processing}
+```{r data visualization}
 train_target_distribution_df <- as.data.frame(train_target_distribution)
 colnames(train_target_distribution_df) <- c("loan_default", "Count")
 ```
 
-```{r data processing}
+```{r data visualization}
 ggplot(train_target_distribution_df, aes(x = loan_default, y = Count, fill = loan_default)) +
     geom_bar(stat = "identity") +
     scale_fill_manual(values = c("No" = "#1f77b4", "Yes" = "#ff7f0e")) +
@@ -330,17 +332,17 @@ ggplot(train_target_distribution_df, aes(x = loan_default, y = Count, fill = loa
 
 The distribution of the target variable, `loan_default`, in the holdout dataset was examined using the `table()` function to count the occurrences of each class, and the `prop.table()` function to calculate the proportions. The results were then visualized using a bar plot created with the `ggplot2` package.
 
-```{r data processing}
+```{r data visualization}
 hold_target_distribution <- table(hold_raw$loan_default)
 hold_target_proportions <- prop.table(hold_target_distribution)
 ```
 
-```{r data processing}
+```{r data visualization}
 hold_target_distribution_df <- as.data.frame(hold_target_distribution)
 colnames(hold_target_distribution_df) <- c("loan_default", "Count")
 ```
 
-```{r data processing}
+```{r data visualization}
 ggplot(hold_target_distribution_df, aes(x = loan_default, y = Count, fill = loan_default)) +
     geom_bar(stat = "identity", color="white", alpha=0.9) +
     scale_fill_manual(values = c("No" = "#1f77b4", "Yes" = "#ff7f0e")) +
@@ -359,7 +361,7 @@ The numeric variables in the training and holdout datasets were examined using h
 
 #### Historgrams of Numeric Variables in the Training Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_histogram(
   train_raw %>% select(all_of(numeric_vars)),
   ggtheme =
@@ -381,7 +383,7 @@ DataExplorer::plot_histogram(
 
 #### Historgrams of Numeric Variables in the Holdout Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_histogram(
   hold_raw %>% select(all_of(hold_numeric_vars)),
   ggtheme =
@@ -408,7 +410,7 @@ The numeric variables in the training and holdout datasets were examined using b
 
 #### Boxplots of Numeric Variables in the Training Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_boxplot(
   train_raw %>% select(all_of(numeric_vars)),
   ggtheme =
@@ -430,7 +432,7 @@ DataExplorer::plot_boxplot(
 
 #### Boxplots of Numeric Variables in the Holdout Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_boxplot(
   hold_raw %>% select(all_of(hold_numeric_vars)),
   ggtheme =
@@ -457,7 +459,7 @@ The numeric variables in the training and holdout datasets were examined using d
 
 #### Density Plots of Numeric Variables in the Training Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_density(
   train_raw %>% select(all_of(numeric_vars)),
   ggtheme =
@@ -479,7 +481,7 @@ DataExplorer::plot_density(
 
 #### Density Plots of Numeric Variables in the Holdout Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_density(
   hold_raw %>% select(all_of(hold_numeric_vars)),
   ggtheme =
@@ -506,7 +508,7 @@ The numeric variables in the training and holdout datasets were examined using c
 
 #### Correlation Heat Map of Numeric Variables in the Training Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_correlation(
   train_raw %>% select(all_of(numeric_vars)),
   ggtheme =
@@ -526,7 +528,7 @@ DataExplorer::plot_correlation(
 
 #### Correlation Heat Map of Numeric Variables in the Holdout Dataset
 
-```{r data processing}
+```{r data visualization}
 DataExplorer::plot_correlation(
   hold_raw %>% select(all_of(hold_numeric_vars)),
   ggtheme =
@@ -551,7 +553,7 @@ The numeric variables in the training and holdout datasets were examined using p
 
 #### Pairwise Scatter Plots of Numeric Variables in the Training Dataset
 
-```{r data processing}
+```{r data visualization}
 GGally::ggpairs(
   train_raw %>% select(all_of(numeric_vars)),
   upper = list(continuous = wrap("cor", size = 4)),
@@ -564,7 +566,7 @@ GGally::ggpairs(
 
 #### Pairwise Scatter Plots of Numeric Variables in the Holdout Dataset
 
-```{r data processing}
+```{r data visualization}
 GGally::ggpairs(
   hold_raw %>% select(all_of(hold_numeric_vars)),
   upper = list(continuous = wrap("cor", size = 4)),
@@ -576,12 +578,14 @@ GGally::ggpairs(
 )
 ```
 
-### Categorical Variable Distributions
+### Categorical Variable Distributions - Frequency Tables
 ____________________________________________________________________________________________________________
+
+The categorical variables in the training and holdout datasets were examined using frequency tables to visualize their distributions. The `table()` function was used to create the frequency tables, with customizations applied to the theme and appearance of the tables.
 
 #### Frequecy Tables of Categorical Variables in the Training Dataset
 
-```{r data processing}
+```{r data visualization}
 for (col in names(categorical_vars)) {
     print(table(categorical_vars[[col]])[1:5])
 }
@@ -589,11 +593,40 @@ for (col in names(categorical_vars)) {
 
 #### Frequecy Tables of Categorical Variables in the Holdout Dataset
 
-```{r data processing}
+```{r data visualization}
 for (col in names(hold_categorical_vars)) {
     print(table(hold_categorical_vars[[col]])[1:5])
 }
 ```
+
+### Categorical Variable Distributions - Bar Plots
+____________________________________________________________________________________________________________
+
+The categorical variables in the training and holdout datasets were examined using bar plots to visualize their distributions. The `ggplot2` package was used to create the bar plots, with customizations applied to the theme and appearance of the plots. A function was created to generate bar plots for each categorical variable in the datasets. The function takes three arguments: the dataset, the list of categorical variables, and a title prefix for the plots. It iterates through each categorical variable, creates a bar plot using `ggplot2`, and prints the plot.
+
+```{r data visualization}
+data_visualization_categorical <- function(data, categorical_vars, title_prefix) {
+    for (col in categorical_vars) {
+        plot <- ggplot(data, aes_string(x = col)) +
+            geom_bar(fill = "#4E79A7", color = "white", alpha = 0.9) +
+            labs(title = paste(title_prefix, col),
+                 x = col,
+                 y = "Count") +
+            theme_bw(base_size = 14) +
+            theme(legend.position = "none",
+                  plot.title = element_text(face = "bold", hjust = 0.5))
+        print(plot)
+    }
+}
+```
+
+```{r data visualization}
+data_visualization_categorical(train_raw, categorical_vars, "Distribution of Categorical Variable in Training Dataset:")
+``` 
+
+```{r data visualization}
+data_visualization_categorical(hold_raw, hold_categorical_vars, "Distribution of Categorical Variable in Holdout Dataset:")
+``` 
 
 
 ---
