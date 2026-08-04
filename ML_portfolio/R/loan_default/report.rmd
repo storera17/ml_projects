@@ -251,7 +251,51 @@ skimr::skim(train_raw)
 skimr::skim(hold_raw)
 ```
 
+### Grouping Numeric Variables
+____________________________________________________________________________________________________________
 
+The numeric variables in the training dataset were identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for numeric variables. The names of these numeric variables were then extracted using the `names()` function.
+
+```{r data processing}
+numeric_vars <- train_raw %>%
+  select(where(is.numeric)) %>%
+  names()
+
+numeric_vars
+```
+
+The numeric variables in the holdout dataset were also identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for numeric variables. The names of these numeric variables were then extracted using the `names()` function.
+
+```{r data processing}
+hold_numeric_vars <- hold_raw %>%
+  select(where(is.numeric)) %>%
+  names()
+
+hold_numeric_vars
+```
+
+### Grouping Categorical Variables
+____________________________________________________________________________________________________________
+
+The categorical variables in the training dataset were identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for character or factor variables. The names of these categorical variables were then extracted using the `names()` function.
+
+```{r data processing}
+categorical_vars <- train_raw %>%
+  select(where(~ is.character(.x) || is.factor(.x))) %>%
+  names()
+
+categorical_vars
+```
+
+The categorical variables in the holdout dataset were also identified and grouped together for further analysis. This was done using the `select()` function from the `dplyr` package, along with the `where()` function to filter for character or factor variables. The names of these categorical variables were then extracted using the `names()` function.
+
+```{r data processing}
+hold_categorical_vars <- hold_raw %>%
+  select(where(~ is.character(.x) || is.factor(.x))) %>%
+  names()
+
+hold_categorical_vars
+```
 
 ---
 
