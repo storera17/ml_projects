@@ -954,6 +954,122 @@ for (col in names(hold_categorical_vars)) {
 }
 ```
 
+### Rare Category Assessment of Categorical Variables
+_____________________________________________________________________________________________________________
+
+The presence of rare categories can be assessed with code below. A function, `assess_rare_categories`, was created. This function has five dependencies in order to properly evaluate the presence of rare categories. 
+
+#### Creating A Rare Category Assessment Function
+
+```{r dqa}
+assess_rare_categories <- function(data,
+                                   variables = NULL,
+                                   target = "loan_default",
+                                   min_count = 30,
+                                   min_prop = 0.01) {
+  if (is.null(variables)) {
+    variables <- names(data)[sapply(data, function(x) is.character(x) || is.factor(x))]
+  }
+
+  variables <- setdiff(variables, target)
+
+  purrr::map_dfr(variables, function(v) {
+    data %>%
+      transmute(
+        variable = v,
+        value = as.character(.data[[v]])
+      ) %>%
+      mutate(
+        value = ifelse(is.na(value) | stringr::str_squish(value) == "", "Missing", value),
+        value = stringr::str_squish(value)
+      ) %>%
+      count(variable, value, name = "count") %>%
+      mutate(
+        total_rows = nrow(data),
+        proportion = count / total_rows,
+        rare_category = count < min_count | proportion < min_prop
+      )
+  })
+}
+```
+
+#### Rare Category Assessment of Categorical Variables in the Training Dataset
+
+```{r dqa}
+train_rare_categories <- assess_rare_categories(
+  data = train_raw,
+  target = "loan_default",
+  min_count = 30,
+  min_prop = 0.01
+)
+
+train_rare_summary <- train_rare_categories %>%
+  group_by(variable) %>%
+  summarise(
+    total_levels = n(),
+    rare_levels = sum(rare_category),
+    percent_levels_rare = rare_levels / total_levels,
+    rows_in_rare_levels = sum(count[rare_category]),
+    percent_rows_in_rare_levels = rows_in_rare_levels / first(total_rows),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(percent_rows_in_rare_levels), desc(rare_levels))
+
+train_rare_summary %>%
+  mutate(
+    percent_levels_rare = scales::percent(percent_levels_rare, accuracy = 0.1),
+    percent_rows_in_rare_levels = scales::percent(percent_rows_in_rare_levels, accuracy = 0.1)
+  ) %>%
+  knitr::kable(caption = "Rare Category Assessment for Training Data")
+```
+
+#### Rare Category Assessment of Categorical Variables in the Holdout Dataset
+
+```{r dqa}
+holdout_rare_categories <- assess_rare_categories(
+  data = hold_raw,
+  target = "loan_default",
+  min_count = 30,
+  min_prop = 0.01
+)
+
+holdout_rare_summary <- holdout_rare_categories %>%
+  group_by(variable) %>%
+  summarise(
+    total_levels = n(),
+    rare_levels = sum(rare_category),
+    percent_levels_rare = rare_levels / total_levels,
+    rows_in_rare_levels = sum(count[rare_category]),
+    percent_rows_in_rare_levels = rows_in_rare_levels / first(total_rows),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(percent_rows_in_rare_levels), desc(rare_levels))
+
+holdout_rare_summary %>%
+  mutate(
+    percent_levels_rare = scales::percent(percent_levels_rare, accuracy = 0.1),
+    percent_rows_in_rare_levels = scales::percent(percent_rows_in_rare_levels, accuracy = 0.1)
+  ) %>%
+  knitr::kable(caption = "Rare Category Assessment for Holdout Data")
+```
+
+### Potential Data Leakage 
+_____________________________________________________________________________________________________________
+
+The potential for data leakage was assessed ... _
+
+#### Determination of Potential Data Leakage in the Training Dataset
+
+```{r dqa}
+
+```
+
+#### Determination of Potential Data Leakage in the Holdout Dataset
+
+```{r dqa}
+
+```
+
 
 ---
 
