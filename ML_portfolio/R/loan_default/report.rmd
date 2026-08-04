@@ -297,6 +297,58 @@ hold_categorical_vars <- hold_raw %>%
 hold_categorical_vars
 ```
 
+### Target Variable Distribution
+____________________________________________________________________________________________________________
+
+#### Distribution of the Target Variable in the Training Dataset
+
+The distribution of the target variable, `loan_default`, in the training dataset was examined using the `table()` function to count the occurrences of each class, and the `prop.table()` function to calculate the proportions. The results were then visualized using a bar plot created with the `ggplot2` package.
+
+```{r data processing}
+train_target_distribution <- table(train_raw$loan_default)
+train_target_proportions <- prop.table(train_target_distribution)
+```
+
+```{r data processing}
+train_target_distribution_df <- as.data.frame(train_target_distribution)
+colnames(train_target_distribution_df) <- c("loan_default", "Count")
+```
+
+```{r data processing}
+ggplot(train_target_distribution_df, aes(x = loan_default, y = Count, fill =
+  loan_default)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Distribution of Loan Default in Training Dataset",
+        x = "Loan Default",
+        y = "Count") +
+    theme_minimal()
+```
+
+#### Distribution of the Target Variable in the Holdout Dataset
+
+The distribution of the target variable, `loan_default`, in the holdout dataset was examined using the `table()` function to count the occurrences of each class, and the `prop.table()` function to calculate the proportions. The results were then visualized using a bar plot created with the `ggplot2` package.
+
+```{r data processing}
+hold_target_distribution <- table(hold_raw$loan_default)
+hold_target_proportions <- prop.table(hold_target_distribution)
+```
+
+```{r data processing}
+hold_target_distribution_df <- as.data.frame(hold_target_distribution)
+colnames(hold_target_distribution_df) <- c("loan_default", "Count")
+```
+
+```{r data processing}
+ggplot(hold_target_distribution_df, aes(x = loan_default, y = Count, fill = loan_default)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Distribution of Loan Default in Holdout Dataset",
+        x = "Loan Default",
+        y = "Count") +
+    theme_minimal()
+```
+
+
+
 ---
 
 # **Results**
