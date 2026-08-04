@@ -847,7 +847,7 @@ DataExplorer::plot_missing(hold_raw, ggtheme = theme_bw(base_size = 14))
 ### Anomalic Value Detection
 ____________________________________________________________________________________________________________
 
-The strategy employed to detect anomalic values in the numeric variables of the training and holdout datasets was based on the interquartile range (IQR) method. The IQR is a measure of statistical dispersion, which is the difference between the third quartile (Q3) and the first quartile (Q1). Anomalic values, or outliers, were identified as any data points that fall below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR. The `boxplot.stats()` function was used to calculate the IQR and identify outliers for each numeric variable in both datasets. The results were then printed for each variable that contained anomalic values.
+The strategy employed to detect anomalic values in the numeric variables of the training and holdout datasets was based on the interquartile range (IQR) method. The IQR is a measure of statistical dispersion, which is the difference between the third quartile (Q3) and the first quartile (Q1). Anomalic values, or outliers, were identified as any data points that fall below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR. The `boxplot.stats()` function was used to calculate the IQR and identify outliers for each numeric variable in both datasets. The results were then printed for each variable that contained anomalic values. This only applies to numeric variables, as categorical variables do not have a meaningful IQR. Outliers are expected in financial data. High income, high revolving balance, and large loan amounts can be valid borrower records rather than data entry errors. For this reason, the workflow avoids deleting outliers by default. The model search includes variants that add outlier flags and log transformations.
 
 #### Anomalic Values in the Training Dataset
 
@@ -872,6 +872,60 @@ for (col in names(hold_numeric_vars)) {
     }
 }
 ```
+
+### Inconsistent Values
+_____________________________________________________________________________________________________________
+
+First, the categorical variables in both the training and holdout datasets were checked for inconsistent values. Inconsistent values refer to unexpected or invalid entries in categorical variables that do not conform to the expected categories. The `unique()` function was used to identify the unique values present in each categorical variable. If a variable had more than 10 unique values, it was flagged for further inspection, as this may indicate potential inconsistencies or data quality issues. The results were printed for each variable that contained inconsistent values. Second, the numeric variables in both datasets were checked for inconsistent values. Inconsistent values in numeric variables refer to unexpected or invalid entries that fall outside the expected range or distribution of values. The `summary()` function was used to examine the summary statistics of each numeric variable, including the minimum, maximum, mean, and quartiles. If a variable had extreme values or outliers that were significantly different from the rest of the data, it was flagged for further inspection. The results were printed for each variable that contained inconsistent values. This step is important to ensure the integrity and reliability of the data before proceeding with further analysis and modeling.
+
+#### Inconsistent Values in Categorical Variables in the Training Dataset
+
+```{r dqa}
+for (col in names(categorical_vars)) {
+    unique_values <- unique(train_raw[[col]])
+    if (length(unique_values) > 10) {
+        print(paste("Inconsistent values in", col, "in Training Dataset:"))
+        print(unique_values)
+    }
+}
+```
+
+#### Inconsistent Values in Categorical Variables in the Holdout Dataset
+
+```{r dqa}
+for (col in names(hold_categorical_vars)) {
+    unique_values <- unique(hold_raw[[col]])
+    if (length(unique_values) > 10) {
+        print(paste("Inconsistent values in", col, "in Holdout Dataset:"))
+        print(unique_values)
+    }
+}
+```
+
+#### Inconsistent Values in Numeric Variables in the Training Dataset
+
+```{r dqa}
+for (col in names(numeric_vars)) {
+    summary_stats <- summary(train_raw[[col]])
+    if (summary_stats["Min."] < 0 || summary_stats["Max."] > 1000000) {
+        print(paste("Inconsistent values in", col, "in Training Dataset:"))
+        print(summary_stats)
+    }
+}
+```
+
+#### Inconsistent Values in Numeric Variables in the Holdout Dataset
+
+```{r dqa}
+for (col in names(hold_numeric_vars)) {
+    summary_stats <- summary(hold_raw[[col]])
+    if (summary_stats["Min."] < 0 || summary_stats["Max."] > 1000000) {
+        print(paste("Inconsistent values in", col, "in Holdout Dataset:"))
+        print(summary_stats)
+    }
+```
+
+
 
 
 ---
