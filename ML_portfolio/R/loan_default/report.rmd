@@ -604,8 +604,10 @@ ________________________________________________________________________________
 
 The categorical variables in the training and holdout datasets were examined using bar plots to visualize their distributions. The `ggplot2` package was used to create the bar plots, with customizations applied to the theme and appearance of the plots. A function was created to generate bar plots for each categorical variable in the datasets. The function takes three arguments: the dataset, the list of categorical variables, and a title prefix for the plots. It iterates through each categorical variable, creates a bar plot using `ggplot2`, and prints the plot.
 
+#### Creating the Bar Plots Function
+
 ```{r data visualization}
-data_visualization_categorical <- function(data, categorical_vars, title_prefix) {
+bar_plots <- function(data, categorical_vars, title_prefix) {
     for (col in categorical_vars) {
         plot <- ggplot(data, aes_string(x = col)) +
             geom_bar(fill = "#4E79A7", color = "white", alpha = 0.9) +
@@ -620,12 +622,16 @@ data_visualization_categorical <- function(data, categorical_vars, title_prefix)
 }
 ```
 
-```{r data visualization}
-data_visualization_categorical(train_raw, categorical_vars, "Distribution of Categorical Variable in Training Dataset:")
-``` 
+#### Bar Plots of Categorical Variables in the Training Dataset
 
 ```{r data visualization}
-data_visualization_categorical(hold_raw, hold_categorical_vars, "Distribution of Categorical Variable in Holdout Dataset:")
+bar_plots(train_raw, categorical_vars, "Distribution of Categorical Variable in Training Dataset:")
+``` 
+
+#### Bar Plots of Categorical Variables in the Holdout Dataset
+
+```{r data visualization}
+bar_plots(hold_raw, hold_categorical_vars, "Distribution of Categorical Variable in Holdout Dataset:")
 ``` 
 
 
