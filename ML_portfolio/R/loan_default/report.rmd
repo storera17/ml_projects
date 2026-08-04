@@ -204,7 +204,16 @@ dim(train_raw)
 dim(hold_raw)
 ```
 
-The number of unique instances for each variable were examined via `sapplu
+The number of unique instances for each variable were examined via `sapply()` and `n_distinct()` functions.
+
+```{r data inspection}
+sapply(train_raw, n_distinct)
+```
+
+```{r data inspection}
+sapply(hold_raw, n_distinct)
+```
+
 ## *Data Processing, Cleaning, & Exploratory Data Analysis*
 
 ---
