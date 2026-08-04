@@ -315,13 +315,15 @@ colnames(train_target_distribution_df) <- c("loan_default", "Count")
 ```
 
 ```{r data processing}
-ggplot(train_target_distribution_df, aes(x = loan_default, y = Count, fill =
-  loan_default)) +
+ggplot(train_target_distribution_df, aes(x = loan_default, y = Count, fill = loan_default)) +
     geom_bar(stat = "identity") +
+    scale_fill_manual(values = c("No" = "#1f77b4", "Yes" = "#ff7f0e")) +
     labs(title = "Distribution of Loan Default in Training Dataset",
         x = "Loan Default",
         y = "Count") +
-    theme_minimal()
+    theme_bw(base_size = 14) +
+    theme(legend.position = "none",
+          plot.title = element_text(face = "bold", hjust = 0.5))
 ```
 
 #### Distribution of the Target Variable in the Holdout Dataset
@@ -340,14 +342,20 @@ colnames(hold_target_distribution_df) <- c("loan_default", "Count")
 
 ```{r data processing}
 ggplot(hold_target_distribution_df, aes(x = loan_default, y = Count, fill = loan_default)) +
-    geom_bar(stat = "identity") +
+    geom_bar(stat = "identity", color="white", alpha=0.9) +
+    scale_fill_manual(values = c("No" = "#1f77b4", "Yes" = "#ff7f0e")) +
     labs(title = "Distribution of Loan Default in Holdout Dataset",
         x = "Loan Default",
         y = "Count") +
-    theme_minimal()
+    theme_bw(base_size = 14) +
+    theme(legend.position = "none",
+          plot.title = element_text(face = "bold", hjust = 0.5))    
 ```
 
+### Numeric Variable Distributions
+____________________________________________________________________________________________________________
 
+#### Historgrams of Numeric Variables in the Training Dataset
 
 ---
 
