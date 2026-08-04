@@ -925,7 +925,34 @@ for (col in names(hold_numeric_vars)) {
     }
 ```
 
+### High Cardinality Categorical Variables
+_____________________________________________________________________________________________________________
 
+A categorical variable with a high cardinality is one that has a large number of unique categories or levels. High cardinality can pose challenges for modeling, as it may lead to overfitting or increased computational complexity. In this analysis, categorical variables with more than 10 unique values were flagged as high cardinality. The `unique()` function was used to identify the unique values present in each categorical variable, and the results were printed for each variable that had high cardinality. These variables can be further examined to determine if they can be transformed or encoded in a way that reduces their cardinality, such as through grouping or feature engineering. The presence of high cardinality categorical variables during modeling can be addressed through techniques such as one-hot encoding, target encoding, or embedding representations, depending on the modeling approach and the specific characteristics of the data. The high cardinality variables can limit the choice of models and may require additional preprocessing steps to ensure that the model can effectively learn from the data.
+
+#### High Cardinality Categorical Variables in the Training Dataset
+
+```{r dqa}
+for (col in names(categorical_vars)) {
+    unique_values <- unique(train_raw[[col]])
+    if (length(unique_values) > 10) {
+        print(paste("High cardinality categorical variable in Training Dataset:", col))
+        print(unique_values)
+    }
+}
+```
+
+#### High Cardinality Categorical Variables in the Holdout Dataset
+
+```{r dqa}
+for (col in names(hold_categorical_vars)) {
+    unique_values <- unique(hold_raw[[col]])
+    if (length(unique_values) > 10) {
+        print(paste("High cardinality categorical variable in Holdout Dataset:", col))
+        print(unique_values)
+    }
+}
+```
 
 
 ---
