@@ -241,7 +241,17 @@ class_comparison
 ### Summary Statistics
 ____________________________________________________________________________________________________________
 
-The. variables in the training dataset were separated into numeric and categorical variables 
+The summary statistics of the datasets were examined using the `skimr::skim()` function. This function provides a comprehensive overview of the data, including the number of missing values, mean, median, standard deviation, and other relevant statistics for each variable.
+
+```{r data processing}
+skimr::skim(train_raw)
+```
+
+```{r data processing}
+skimr::skim(hold_raw)
+```
+
+
 
 ---
 
