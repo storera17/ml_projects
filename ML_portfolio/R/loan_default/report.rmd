@@ -1075,28 +1075,12 @@ It was assumed that data leakage was not a potential problem. However, this will
 ### Character-to-Factor Conversion
 _____________________________________________________________________________________________________________
 
-#### Training Dataset
-
-```{r data processing}
-
-```
-
-#### Holdout Dataset
-
 ```{r data processing}
 
 ```
 
 ### Character-to-Numeric Conversion
 _____________________________________________________________________________________________________________
-
-#### Training Dataset
-
-```{r data processing}
-
-```
-
-#### Holdout Dataset
 
 ```{r data processing}
 
@@ -1105,29 +1089,189 @@ ________________________________________________________________________________
 ### Character-to-Date Conversion
 _____________________________________________________________________________________________________________
 
-#### Training Dataset
+```{r data processing}
+
+```
+
+### Missing Value Treatment
+_____________________________________________________________________________________________________________
 
 ```{r data processing}
+
+```
+
+### Handling Rare or Sparse Categories
+_____________________________________________________________________________________________________________
+
+```{r data processing}
+
+```
+
+### Removing Unnecessary Variables
+_____________________________________________________________________________________________________________
+
+```{r data processing}
+
+```
+
+
+### Applying Preprocessing to Holdout Data
+_____________________________________________________________________________________________________________
+
+#### Character-to-Factor Conversion
+
+```{r data processing}
+
+```
+
+#### Character-to-Numeric Conversion
+
+```{r data processing}
+
+```
+
+#### Character-to-Date Conversion
+
+```{r data processing}
+
+```
+
+#### Missing Value Treatment
+
+```{r data processing}
+
+```
+
+#### Handling Rare or Sparse Categories
+
+```{r data processing}
+
+```
+
+#### Removing Unnecessary Variables
+
+```{r data processing}
+
+```
+
+## *Feature Engineering*
+
+### Ordinal Risk Features
+_____________________________________________________________________________________________________________
+
+The variables `grade_score` and `sub_grade_score` translate lender risk grades into ordered numeric scores. This is useful because grade A is lower risk than grade B, grade B is lower risk than grade C, and so on.
+
+#### Training Dataset
+
+```{r feature engineering}
 
 ```
 
 #### Holdout Dataset
 
-```{r data processing}
+```{r feature engineering}
 
 ```
 
-####
+### Employment Length Features
+_____________________________________________________________________________________________________________
 
 
 
-####
+#### Training Dataset
+
+```{r feature engineering}
+
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+
+```
+
+### Sparse Count Binning
+_____________________________________________________________________________________________________________
 
 
-####
+
+#### Training Dataset
+
+```{r feature engineering}
+
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+
+```
 
 
-####
+### Credit History Features
+_____________________________________________________________________________________________________________
+
+
+
+#### Training Dataset
+
+```{r feature engineering}
+
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+
+```
+
+### Date-Based Features
+_____________________________________________________________________________________________________________
+
+
+
+#### Training Dataset
+
+```{r feature engineering}
+
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+
+```
+
+### Final Feature Review
+_____________________________________________________________________________________________________________
+
+The cleaned dataset has no missing values after preprocessing and contains a mixture of numeric, categorical, and engineered predictors.
+
+#### Training Dataset
+
+```{r feature engineering}
+skimr::skim(train_raw)
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+
+```
+
+## *Re-Assignment*
+____________________________________________________________________________________________________________
+
+Since the datasets are "cleaned", the `raw` denotion is removed. 
+
+```{r assign}
+# TRAINING DATASET RE-ASSIGNMENT
+train <- train_raw
+
+# HOLDOUT DATASET RRE-ASSIGNMENT
+hold <- hold_raw
+```
+
 ---
 
 # **Results**
