@@ -844,7 +844,7 @@ DataExplorer::plot_missing(train_raw, ggtheme = theme_bw(base_size = 14))
 DataExplorer::plot_missing(hold_raw, ggtheme = theme_bw(base_size = 14))
 ```
 
-### Anomalic Value Detection
+### Anomalic Values Assessment
 ____________________________________________________________________________________________________________
 
 The strategy employed to detect anomalic values in the numeric variables of the training and holdout datasets was based on the interquartile range (IQR) method. The IQR is a measure of statistical dispersion, which is the difference between the third quartile (Q3) and the first quartile (Q1). Anomalic values, or outliers, were identified as any data points that fall below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR. The `boxplot.stats()` function was used to calculate the IQR and identify outliers for each numeric variable in both datasets. The results were then printed for each variable that contained anomalic values. This only applies to numeric variables, as categorical variables do not have a meaningful IQR. Outliers are expected in financial data. High income, high revolving balance, and large loan amounts can be valid borrower records rather than data entry errors. For this reason, the workflow avoids deleting outliers by default. The model search includes variants that add outlier flags and log transformations.
@@ -873,7 +873,7 @@ for (col in names(hold_numeric_vars)) {
 }
 ```
 
-### Inconsistent Values
+### Inconsistent Values Assessment
 _____________________________________________________________________________________________________________
 
 First, the categorical variables in both the training and holdout datasets were checked for inconsistent values. Inconsistent values refer to unexpected or invalid entries in categorical variables that do not conform to the expected categories. The `unique()` function was used to identify the unique values present in each categorical variable. If a variable had more than 10 unique values, it was flagged for further inspection, as this may indicate potential inconsistencies or data quality issues. The results were printed for each variable that contained inconsistent values. Second, the numeric variables in both datasets were checked for inconsistent values. Inconsistent values in numeric variables refer to unexpected or invalid entries that fall outside the expected range or distribution of values. The `summary()` function was used to examine the summary statistics of each numeric variable, including the minimum, maximum, mean, and quartiles. If a variable had extreme values or outliers that were significantly different from the rest of the data, it was flagged for further inspection. The results were printed for each variable that contained inconsistent values. This step is important to ensure the integrity and reliability of the data before proceeding with further analysis and modeling.
@@ -925,7 +925,7 @@ for (col in names(hold_numeric_vars)) {
     }
 ```
 
-### High Cardinality Categorical Variables
+### High Cardinality Assessment
 _____________________________________________________________________________________________________________
 
 A categorical variable with a high cardinality is one that has a large number of unique categories or levels. High cardinality can pose challenges for modeling, as it may lead to overfitting or increased computational complexity. In this analysis, categorical variables with more than 10 unique values were flagged as high cardinality. The `unique()` function was used to identify the unique values present in each categorical variable, and the results were printed for each variable that had high cardinality. These variables can be further examined to determine if they can be transformed or encoded in a way that reduces their cardinality, such as through grouping or feature engineering. The presence of high cardinality categorical variables during modeling can be addressed through techniques such as one-hot encoding, target encoding, or embedding representations, depending on the modeling approach and the specific characteristics of the data. The high cardinality variables can limit the choice of models and may require additional preprocessing steps to ensure that the model can effectively learn from the data.
@@ -954,7 +954,7 @@ for (col in names(hold_categorical_vars)) {
 }
 ```
 
-### Rare Category Assessment of Categorical Variables
+### Rare Category Assessment
 _____________________________________________________________________________________________________________
 
 The presence of rare categories can be assessed with code below. A function, `assess_rare_categories`, was created. This function has five dependencies in order to properly evaluate the presence of rare categories.
@@ -1053,22 +1053,81 @@ holdout_rare_summary %>%
   knitr::kable(caption = "Rare Category Assessment for Holdout Data")
 ```
 
-### Potential Data Leakage
+### Data Leakage Assessment
 _____________________________________________________________________________________________________________
 
+It was assumed that data leakage was not a potential problem. However, this will not be the case for real-world examples. Both the training and holdout datasets were examined for possible data leakages.
 
-
-```{r dqa}
-
-```
-
-#### Determination of Potential Data Leakage in the Holdout Dataset
+#### Data Laakage Assessment of Training Dataset
 
 ```{r dqa}
 
 ```
 
+#### Data Leakage Assessment of Holdout Dataset
 
+```{r dqa}
+
+```
+
+## *Data Preprocessing*
+
+### Character-to-Factor Conversion
+_____________________________________________________________________________________________________________
+
+#### Training Dataset
+
+```{r data processing}
+
+```
+
+#### Holdout Dataset
+
+```{r data processing}
+
+```
+
+### Character-to-Numeric Conversion
+_____________________________________________________________________________________________________________
+
+#### Training Dataset
+
+```{r data processing}
+
+```
+
+#### Holdout Dataset
+
+```{r data processing}
+
+```
+
+### Character-to-Date Conversion
+_____________________________________________________________________________________________________________
+
+#### Training Dataset
+
+```{r data processing}
+
+```
+
+#### Holdout Dataset
+
+```{r data processing}
+
+```
+
+####
+
+
+
+####
+
+
+####
+
+
+####
 ---
 
 # **Results**
