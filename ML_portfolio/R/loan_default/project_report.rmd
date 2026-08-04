@@ -49,5 +49,50 @@ knitr::opts_chunk$set(fig_width=6,
                       fig_height=4,
                       #fig_caption=not_applicable_yet
                       )
-                
+
+if(required(pacman)==0)
+    {install.packaghes("pacman)}
+
+pacman::p_load(
+    caret,
+    corrplot,
+    cluster,
+    DataExplorer,
+    devtools,
+    doParallel,
+    dplyr,
+    dslabs,
+    e1071,
+    fastDummies,
+    forcats,
+    GGally,
+    ggplot2,
+    ggthemes,
+    ggrepel,
+    janitor,
+    leaps,
+    lubridate,
+    magrittr,
+    mlba,
+    pacman,
+    recipes,
+    rpart,
+    rpart.plot,
+    ROCR,
+    purrr,
+    scales,
+    sf,
+    skimr,
+    tidycensus,
+    tidygeocoder,
+    tidyverse,
+    tigris,
+    zipcodeR
+    # Add more packages as needed here
+)
+
+set.seed(123)
+
+project_dir <- "ML_portfolio/R/loan_default/data"
 ```
+
