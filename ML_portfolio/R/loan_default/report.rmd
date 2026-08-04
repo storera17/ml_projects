@@ -1271,6 +1271,57 @@ train <- train_raw
 hold <- hold_raw
 ```
 
+## *Dimension Reduction*
+
+Dimension reduction is considered when a model uses many correlated or dummy-encoded predictors. PCA can reduce many numeric columns into a smaller set of components, but it also reduces interpretability. PCA is most useful for models that are sensitive to high-dimensional numeric input, such as neural networks or regularized models using a wide dummy matrix. It is less necessary for tree-based models because tree models can handle nonlinear splits and mixed predictor importance directly. PCA requires numeric predictors to be centered and scaled. Without scaling, variables measured on large numeric scales can dominate the components.
+
+The code below corresponds to the appropriate PCA process. This code is not evaluated and, therefore, is optional. It is included for completeion.
+
+```{r dimension reduction, eval=FALSE}
+train_dummy <- fastDummies::dummy_cols(
+  train,
+  remove_first_dummy = TRUE,
+  remove_selected_columns = TRUE
+)
+```
+
+```{r dimension reduction, eval=FALSE}
+hold_dummy <- fastDummies::dummy_cols(
+  hold,
+  remove_first_dummy = TRUE,
+  remove_selected_columns = TRUE
+)
+```
+
+```{r dimension reduction, eval=FALSE}
+missing_hold_cols <- setdiff(names(train_dummy), names(hold_dummy))
+for (v in missing_hold_cols) hold_dummy[[v]] <- 0
+```
+
+```{r dimension reduction, eval=FALSE}
+extra_hold_cols <- setdiff(names(hold_dummy), names(train_dummy))
+hold_dummy <- hold_dummy %>% select(-all_of(extra_hold_cols))
+hold_dummy <- hold_dummy %>% select(all_of(names(train_dummy)))
+```
+
+```{r dimension reduction, eval=FALSE}`
+pca_recipe <- recipes::recipe(loan_default ~ ., data = train_dummy) %>%
+  recipes::step_zv(all_predictors()) %>%
+  recipes::step_normalize(all_numeric_predictors()) %>%
+  recipes::step_pca(all_numeric_predictors(), threshold = 0.90)
+```
+
+```{r dimension reduction, eval=FALSE}
+pca_prep <- recipes::prep(pca_recipe, training = train_dummy)
+```
+```{r dimension reduction, eval=FALSE}
+train_pca <- recipes::bake(pca_prep, new_data = train_dummy)
+```
+
+```{r dimension reduction, eval=FALSE}
+hold_pca <- recipes::bake(pca_prep, new_data = hold_dummy)
+```
+
 ---
 
 # **Results**
