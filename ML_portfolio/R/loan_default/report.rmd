@@ -214,6 +214,18 @@ sapply(train_raw, n_distinct)
 sapply(hold_raw, n_distinct)
 ```
 
+It is important to compare the classes of each variable in the training and holdout datasets to ensure consistency. This can be done using the `sapply()` and `class()` functions. To present the findings more cleanly, a tibble can be created to display the variable names, their corresponding classes in the training dataset, and their classes in the holdout dataset. The function `tibble::tibble()` can be used to create this tibble, and the `sapply()` function can be used to apply the `class()` function to each variable in both datasets. The resulting tibble will provide a clear comparison of the variable classes between the two datasets.
+
+```{r data inspection}
+class_comparison <- tibble::tibble(
+  Variable = names(train_raw),
+  Train_Class = sapply(train_raw, function(x) class(x)[1]),
+  Holdout_Class = sapply(hold_raw, function(x) class(x)[1])
+)
+
+class_comparison
+```
+
 ## *Data Processing, Cleaning, & Exploratory Data Analysis*
 
 ---
