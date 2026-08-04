@@ -176,6 +176,9 @@ hold_raw <- readr::read_csv(
 
 ## *Data Inspection*
 
+### Previewing the Dataset
+____________________________________________________________________________________________________________
+
 The structure of the datasets were assessed using the `str()` function. Subsequent previewing of the datasets was done through the utilization of the `head()` function, which shows the first few rows of a dataset.
 
 ```{r data inspection}
@@ -194,6 +197,9 @@ head(train_raw)
 head(hold_raw)
 ```
 
+### Dataset Dimensions
+____________________________________________________________________________________________________________
+
 The dimensions of the dataset were determined by employed the `dim()` function.
 
 ```{r data inspection}
@@ -204,6 +210,8 @@ dim(train_raw)
 dim(hold_raw)
 ```
 
+### The Number of Unique Instances
+____________________________________________________________________________________________________________
 The number of unique instances for each variable were examined via `sapply()` and `n_distinct()` functions.
 
 ```{r data inspection}
@@ -214,6 +222,8 @@ sapply(train_raw, n_distinct)
 sapply(hold_raw, n_distinct)
 ```
 
+### Class Comparison of Variables
+____________________________________________________________________________________________________________
 It is important to compare the classes of each variable in the training and holdout datasets to ensure consistency. This can be done using the `sapply()` and `class()` functions. To present the findings more cleanly, a tibble can be created to display the variable names, their corresponding classes in the training dataset, and their classes in the holdout dataset. The function `tibble::tibble()` can be used to create this tibble, and the `sapply()` function can be used to apply the `class()` function to each variable in both datasets. The resulting tibble will provide a clear comparison of the variable classes between the two datasets.
 
 ```{r data inspection}
@@ -227,6 +237,11 @@ class_comparison
 ```
 
 ## *Data Processing, Cleaning, & Exploratory Data Analysis*
+
+### Summary Statistics
+____________________________________________________________________________________________________________
+
+The. variables in the training dataset were separated into numeric and categorical variables 
 
 ---
 
