@@ -1322,6 +1322,26 @@ train_pca <- recipes::bake(pca_prep, new_data = train_dummy)
 hold_pca <- recipes::bake(pca_prep, new_data = hold_dummy)
 ```
 
+## *Modeling*
+
+### Workflow
+____________________________________________________________________________________________________________
+
+
+
+### Analysis
+____________________________________________________________________________________________________________
+
+
+#### Threshold Optimization
+
+
+
+### Model Tuning Approach
+
+
+
+
 ---
 
 # **Results**
