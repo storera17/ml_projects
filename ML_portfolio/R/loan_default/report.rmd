@@ -351,7 +351,7 @@ ggplot(hold_target_distribution_df, aes(x = loan_default, y = Count, fill = loan
         y = "Count") +
     theme_bw(base_size = 14) +
     theme(legend.position = "none",
-          plot.title = element_text(face = "bold", hjust = 0.5))    
+          plot.title = element_text(face = "bold", hjust = 0.5))
 ```
 
 ### Numeric Variable Distributions - Histograms
@@ -406,7 +406,7 @@ DataExplorer::plot_histogram(
 ### Numeric Variable Distributions - Boxplots
 ____________________________________________________________________________________________________________
 
-The numeric variables in the training and holdout datasets were examined using boxplots to visualize their distributions and identify potential outliers. The `DataExplorer` package was used to create the boxplots, with customizations applied to the theme and appearance of the plots. 
+The numeric variables in the training and holdout datasets were examined using boxplots to visualize their distributions and identify potential outliers. The `DataExplorer` package was used to create the boxplots, with customizations applied to the theme and appearance of the plots.
 
 #### Boxplots of Numeric Variables in the Training Dataset
 
@@ -698,7 +698,7 @@ correlation_matrix_hold <- cor(hold_raw %>% select(all_of(hold_numeric_vars)), u
 ### Numeric Variable Distributions - High Correlation Pairs
 ____________________________________________________________________________________________________________
 
-The numeric variables in the training and holdout datasets were examined using scatter plots to visualize the relationships between highly correlated pairs of variables. The `ggplot2` package was used to create the scatter plots, with customizations applied to the theme and appearance of the plots. A function was created to generate scatter plots for each pair of highly correlated variables in the datasets. The function takes three arguments: the dataset, a list of highly correlated variable pairs, and a title prefix for the plots. It iterates through each pair of highly correlated variables, creates a scatter plot using `ggplot2`, and prints the plot. The goal of this analysis is to identify potential multicollinearity issues that may affect the performance of the predictive model. By visualizing the relationships between highly correlated pairs of variables, we can gain insights into how these variables may be related and inform our modeling approach. A function was created to generate scatter plots for each pair of highly correlated variables in the datasets. The function takes three arguments: the dataset, a list of highly correlated variable pairs, and a title prefix for the plots. It iterates through each pair of highly correlated variables, creates a scatter plot using `ggplot2`, and prints the plot. 
+The numeric variables in the training and holdout datasets were examined using scatter plots to visualize the relationships between highly correlated pairs of variables. The `ggplot2` package was used to create the scatter plots, with customizations applied to the theme and appearance of the plots. A function was created to generate scatter plots for each pair of highly correlated variables in the datasets. The function takes three arguments: the dataset, a list of highly correlated variable pairs, and a title prefix for the plots. It iterates through each pair of highly correlated variables, creates a scatter plot using `ggplot2`, and prints the plot. The goal of this analysis is to identify potential multicollinearity issues that may affect the performance of the predictive model. By visualizing the relationships between highly correlated pairs of variables, we can gain insights into how these variables may be related and inform our modeling approach. A function was created to generate scatter plots for each pair of highly correlated variables in the datasets. The function takes three arguments: the dataset, a list of highly correlated variable pairs, and a title prefix for the plots. It iterates through each pair of highly correlated variables, creates a scatter plot using `ggplot2`, and prints the plot.
 
 #### Creating the Scatter Plots Function
 
@@ -777,13 +777,13 @@ bar_plots <- function(data, categorical_vars, title_prefix) {
 
 ```{r data visualization}
 bar_plots(train_raw, categorical_vars, "Distribution of Categorical Variable in Training Dataset:")
-``` 
+```
 
 #### Bar Plots of Categorical Variables in the Holdout Dataset
 
 ```{r data visualization}
 bar_plots(hold_raw, hold_categorical_vars, "Distribution of Categorical Variable in Holdout Dataset:")
-``` 
+```
 
 ### Categorial Variable Distributions - Proportions by Loan Default Status
 ____________________________________________________________________________________________________________
@@ -842,7 +842,7 @@ DataExplorer::plot_missing(train_raw, ggtheme = theme_bw(base_size = 14))
 
 ```{r dqa}
 DataExplorer::plot_missing(hold_raw, ggtheme = theme_bw(base_size = 14))
-``` 
+```
 
 ### Anomalic Value Detection
 ____________________________________________________________________________________________________________
@@ -957,7 +957,7 @@ for (col in names(hold_categorical_vars)) {
 ### Rare Category Assessment of Categorical Variables
 _____________________________________________________________________________________________________________
 
-The presence of rare categories can be assessed with code below. A function, `assess_rare_categories`, was created. This function has five dependencies in order to properly evaluate the presence of rare categories. 
+The presence of rare categories can be assessed with code below. A function, `assess_rare_categories`, was created. This function has five dependencies in order to properly evaluate the presence of rare categories.
 
 #### Creating A Rare Category Assessment Function
 
@@ -1053,12 +1053,10 @@ holdout_rare_summary %>%
   knitr::kable(caption = "Rare Category Assessment for Holdout Data")
 ```
 
-### Potential Data Leakage 
+### Potential Data Leakage
 _____________________________________________________________________________________________________________
 
-The potential for data leakage was assessed ... _
 
-#### Determination of Potential Data Leakage in the Training Dataset
 
 ```{r dqa}
 
