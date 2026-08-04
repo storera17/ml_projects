@@ -357,6 +357,29 @@ ________________________________________________________________________________
 
 #### Historgrams of Numeric Variables in the Training Dataset
 
+```{r data processing}
+
+```
+
+### Categorical Variable Distributions
+
+#### Frequecy Tables of Categorical Variables in the Training Dataset
+
+```{r data processing}
+for (col in names(categorical_vars)) {
+    print(table(categorical_vars[[col]])[1:5])
+}
+```
+
+#### Frequecy Tables of Categorical Variables in the Holdout Dataset
+
+```{r data processing}
+for (col in names(hold_categorical_vars)) {
+    print(table(hold_categorical_vars[[col]])[1:5])
+}
+```
+
+
 ---
 
 # **Results**
