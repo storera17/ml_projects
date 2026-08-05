@@ -407,7 +407,9 @@ The numeric variables in the training and holdout datasets were examined using b
 
 ```{r data visualization}
 DataExplorer::plot_boxplot(
-  train_raw %>% select(all_of(numeric_vars)),
+  train_raw %>% 
+    select(loan_default, all_of(numeric_vars)),
+  by = "loan_default",
   ggtheme =
     theme_bw(base_size = 13) +
     theme(
@@ -429,7 +431,9 @@ DataExplorer::plot_boxplot(
 
 ```{r data visualization}
 DataExplorer::plot_boxplot(
-  hold_raw %>% select(all_of(hold_numeric_vars)),
+  hold_raw %>% 
+    select(loan_default, all_of(hold_numeric_vars)),
+  by = "loan_default",
   ggtheme =
     theme_bw(base_size = 13) +
     theme(
@@ -541,139 +545,6 @@ DataExplorer::plot_correlation(
 )
 ```
 
-### Numeric Variable Distributions - Pairwise Scatter Plots
-____________________________________________________________________________________________________________
-
-The numeric variables in the training and holdout datasets were examined using pairwise scatter plots to visualize the relationships between the variables. The `GGally` package was used to create the scatter plots, with customizations applied to the theme and appearance of the plots.
-
-#### Pairwise Scatter Plots of Numeric Variables in the Training Dataset
-
-```{r data visualization}
-GGally::ggpairs(
-  train_raw %>% select(all_of(numeric_vars)),
-  upper = list(continuous = wrap("cor", size = 4)),
-  lower = list(continuous = wrap("points", alpha = 0.3, size
-  = 0.5)),
-  diag = list(continuous = wrap("densityDiag", alpha = 0.5, fill = "#4E79A7")),
-  title = "Pairwise Scatter Plots of Numeric Variables in the Training Dataset"
-)
-```
-
-#### Pairwise Scatter Plots of Numeric Variables in the Holdout Dataset
-
-```{r data visualization}
-GGally::ggpairs(
-  hold_raw %>% select(all_of(hold_numeric_vars)),
-  upper = list(continuous = wrap("cor", size = 4)),
-  lower = list(continuous = wrap("points", alpha = 0.3, size
-  = 0.5)),
-  diag = list(continuous = wrap("densityDiag", alpha = 0.5,
-  fill = "#a3231e")),
-  title = "Pairwise Scatter Plots of Numeric Variables in the Holdout Dataset"
-)
-```
-
-### Numeric Variable Distributions - Predictors by Loan Default Status
-____________________________________________________________________________________________________________
-
-The numeric variables in the training and holdout datasets were examined using boxplots to visualize their distributions by loan default status. The `DataExplorer` package was used to create the boxplots, with customizations applied to the theme and appearance of the plots. This is different from the previous boxplots, which were created to visualize the distributions of the numeric variables without considering the loan default status. By creating boxplots that show the distributions of the numeric variables by loan default status, we can gain insights into how these variables may be related to the likelihood of loan default. This can help us identify potential predictors of loan default and inform our modeling approach.
-
-#### Boxplots of Numeric Variables by Loan Default Status in the Training Dataset
-
-```{r data visualization}
-DataExplorer::plot_boxplot(
-  train_raw %>% select(all_of(numeric_vars), loan_default),
-  by = "loan_default",
-  ggtheme =
-    theme_bw(base_size = 13) +
-    theme(
-      strip.background = element_rect(fill = "#1F77B4"),
-      strip.text = element_text(color = "white", face = "bold"),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(color = "grey90")
-    ),
-  geom_boxplot_args = list(
-    fill = "#4E79A7",
-    color = "white",
-    alpha = 0.9
-  ),
-  ncol = 3
-)
-```
-
-#### Boxplots of Numeric Variables by Loan Default Status in the Holdout Dataset
-
-```{r data visualization}
-DataExplorer::plot_boxplot(
-  hold_raw %>% select(all_of(hold_numeric_vars), loan_default),
-  by = "loan_default",
-  ggtheme =
-    theme_bw(base_size = 13) +
-    theme(
-      strip.background = element_rect(fill = "#a3231e"),
-      strip.text = element_text(color = "white", face = "bold"),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(color = "grey90")
-    ),
-  geom_boxplot_args = list(
-    fill = "#a3231e",
-    color = "white",
-    alpha = 0.9
-  ),
-  ncol = 3
-)
-```
-
-### Numeric Variable Distributions - Predictors by Loan Default Status (Density Plots)
-____________________________________________________________________________________________________________
-
-The numeric variables in the training and holdout datasets were examined using density plots to visualize their distributions by loan default status. The `DataExplorer` package was used to create the density plots, with customizations applied to the theme and appearance of the plots. These are different from the previous density plots, which were created to visualize the distributions of the numeric variables without considering the loan default status. By creating density plots that show the distributions of the numeric variables by loan default status, we can gain insights into how these variables may be related to the likelihood of loan default. This can help us identify potential predictors of loan default and inform our modeling approach.
-
-#### Density Plots of Numeric Variables by Loan Default Status in the Training Dataset
-
-```{r data visualization}
-DataExplorer::plot_density(
-  train_raw %>% select(all_of(numeric_vars), loan_default),
-  by = "loan_default",
-  ggtheme =
-    theme_bw(base_size = 13) +
-    theme(
-      strip.background = element_rect(fill = "#1F77B4"),
-      strip.text = element_text(color = "white", face = "bold"),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(color = "grey90")
-    ),
-  geom_density_args = list(
-    alpha = 0.5,
-    fill = "#4E79A7"
-  ),
-  ncol = 3
-)
-```
-
-#### Density Plots of Numeric Variables by Loan Default Status in the Holdout Dataset
-
-```{r data visualization}
-DataExplorer::plot_density(
-  hold_raw %>% select(all_of(hold_numeric_vars), loan_default),
-  by = "loan_default",
-  ggtheme =
-    theme_bw(base_size = 13) +
-    theme(
-      strip.background = element_rect(fill = "#a3231e"),
-      strip.text = element_text(color = "white", face = "bold"),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_line(color = "grey90")
-    ),
-  geom_density_args = list(
-    alpha = 0.5,
-    fill = "#a3231e"
-  ),
-  ncol = 3
-)
-```
-
-
 ### Numeric Variable Distributions - Correlation Pairs
 ____________________________________________________________________________________________________________
 
@@ -688,40 +559,6 @@ correlation_matrix_train <- cor(train_raw %>% select(all_of(numeric_vars)), use 
 ##### Correlation Matrix of Numeric Variables in the Holdout Dataset
 ```{r data visualization}
 correlation_matrix_hold <- cor(hold_raw %>% select(all_of(hold_numeric_vars)), use = "pairwise.complete.obs")
-```
-
-### Numeric Variable Distributions - High Correlation Pairs
-____________________________________________________________________________________________________________
-
-The numeric variables in the training and holdout datasets were examined using scatter plots to visualize the relationships between highly correlated pairs of variables. The `ggplot2` package was used to create the scatter plots, with customizations applied to the theme and appearance of the plots. A function was created to generate scatter plots for each pair of highly correlated variables in the datasets. The function takes three arguments: the dataset, a list of highly correlated variable pairs, and a title prefix for the plots. It iterates through each pair of highly correlated variables, creates a scatter plot using `ggplot2`, and prints the plot. The goal of this analysis is to identify potential multicollinearity issues that may affect the performance of the predictive model. By visualizing the relationships between highly correlated pairs of variables, we can gain insights into how these variables may be related and inform our modeling approach. A function was created to generate scatter plots for each pair of highly correlated variables in the datasets. The function takes three arguments: the dataset, a list of highly correlated variable pairs, and a title prefix for the plots. It iterates through each pair of highly correlated variables, creates a scatter plot using `ggplot2`, and prints the plot.
-
-#### Creating the Scatter Plots Function
-
-```{r data visualization}
-scatter_plots <- function(data, correlated_pairs, title_prefix) {
-    for (pair in correlated_pairs) {
-        plot <- ggplot(data, aes_string(x = pair[1], y = pair[2])) +
-            geom_point(alpha = 0.5, color = "#4E79A7") +
-            labs(title = paste(title_prefix, pair[1], "vs", pair[2]),
-                 x = pair[1],
-                 y = pair[2]) +
-            theme_bw(base_size = 14) +
-            theme(plot.title = element_text(face = "bold", hjust = 0.5))
-        print(plot)
-    }
-}
-```
-
-#### Scatter Plots of Highly Correlated Pairs in the Training Dataset
-
-```{r data visualization}
-scatter_plots(train_raw, highly_correlated_pairs, "Scatter Plot of Highly Correlated Pairs in Training Dataset:")
-```
-
-#### Scatter Plots of Highly Correlated Pairs in the Holdout Dataset
-
-```{r data visualization}
-scatter_plots(hold_raw, highly_correlated_pairs, "Scatter Plot of Highly Correlated Pairs in Holdout Dataset:")
 ```
 
 ### Categorical Variable Distributions - Frequency Tables
@@ -753,31 +590,55 @@ The categorical variables in the training and holdout datasets were examined usi
 #### Creating the Bar Plots Function
 
 ```{r data visualization}
-bar_plots <- function(data, categorical_vars, title_prefix) {
-    for (col in categorical_vars) {
-        plot <- ggplot(data, aes_string(x = col)) +
-            geom_bar(fill = "#4E79A7", color = "white", alpha = 0.9) +
-            labs(title = paste(title_prefix, col),
-                 x = col,
-                 y = "Count") +
-            theme_bw(base_size = 14) +
-            theme(legend.position = "none",
-                  plot.title = element_text(face = "bold", hjust = 0.5))
-        print(plot)
+bar_plots <- function(data, categorical_vars, title_prefix, max_levels = 20) {
+  for (col in categorical_vars) {
+    
+    n_levels <- data %>%
+      distinct(.data[[col]]) %>%
+      nrow()
+    
+    if (n_levels > max_levels) {
+      message("Skipping ", col, ": ", n_levels, " unique levels.")
+      next
     }
+    
+    plot <- ggplot(data, aes(x = .data[[col]])) +
+      geom_bar(fill = "#4E79A7", color = "white", alpha = 0.9) +
+      labs(
+        title = paste(title_prefix, col),
+        x = col,
+        y = "Count"
+      ) +
+      theme_bw(base_size = 14) +
+      theme(
+        legend.position = "none",
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+
+    print(plot)
+  }
 }
 ```
 
 #### Bar Plots of Categorical Variables in the Training Dataset
 
 ```{r data visualization}
-bar_plots(train_raw, categorical_vars, "Distribution of Categorical Variable in Training Dataset:")
+bar_plots(
+  train_raw,
+  categorical_vars,
+  "Distribution of Categorical Variable in Training Dataset:"
+)
 ```
 
 #### Bar Plots of Categorical Variables in the Holdout Dataset
 
 ```{r data visualization}
-bar_plots(hold_raw, hold_categorical_vars, "Distribution of Categorical Variable in Holdout Dataset:")
+bar_plots(
+  hold_raw,
+  hold_categorical_vars,
+  "Distribution of Categorical Variable in Holdout Dataset:"
+)
 ```
 
 ### Categorial Variable Distributions - Proportions by Loan Default Status
