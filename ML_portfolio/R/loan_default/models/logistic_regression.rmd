@@ -95,30 +95,58 @@ skimr::skim(hold)
 
 ## *Explanation of the Parameters*
 
-### `caret::train` Parameters
+### `train` Parameters
 ____________________________________________________________________________________________________________
 
+The `carat` package contains the function `train()` that sets up a grid of tuning parameters for a number of classification and regression routines, fits each model, and calculates a resampling based performance measure. This function fits predictive models over different tuning parameters. The different tuning parameters are described in **Table 1**. These parameters were utilized to perform logistic regression. The particular parameter that enables logistic regression in the `train()` function is `method`. Setting `method` to `glmnet` runs a logistic regression model.
 
+**Table 1.** A tabulation of the `train()` function's parameters and corresponding descriptions of the parameters.
+
+| Parameter | Description |
+|:---|:---|
+| `x` | Predictor data. For the default method, rows are samples and columns are features. This can be a matrix, data frame, sparse matrix, or similar object, but columns must be named. If using the recipe method, `x` should be an unprepared `recipes::recipe()` object that defines the outcome, predictors, and preprocessing steps. |
+| `...` | Additional arguments passed to the underlying classification or regression routine. Tuning parameters should not be passed here because they belong in `tuneGrid` or `tuneLength`. |
+| `y` | Outcome vector for each sample. This should be numeric for regression or a factor for classification. |
+| `method` | String specifying the model type to train, such as `"glmnet"`, `"rpart"`, `"ranger"`, or `"nnet"`. Available model names can be checked with `names(getModelInfo())`. |
+| `preProcess` | Character vector specifying preprocessing steps for predictor data, such as `"center"`, `"scale"`, `"range"`, `"medianImpute"`, `"pca"`, or `"YeoJohnson"`. This applies only when `x` is a matrix or data frame, not when using a recipe. |
+| `weights` | Numeric vector of case weights. This only affects models that support weighted observations. |
+| `metric` | Summary metric used to select the optimal model. Common defaults are `"RMSE"` and `"Rsquared"` for regression or `"Accuracy"` and `"Kappa"` for classification. If using a custom `summaryFunction`, `metric` should match one of the returned metric names. |
+| `maximize` | Logical value indicating whether the selected metric should be maximized or minimized. |
+| `trControl` | A `trainControl()` object that defines resampling, class probabilities, saved predictions, summary functions, sampling, seeds, and parallel behavior. |
+| `tuneGrid` | Data frame of tuning parameter combinations. Column names must match the model’s tuning parameters, which can be checked with `modelLookup()` or `getModelInfo()`. |
+| `tuneLength` | Integer controlling the size or granularity of the automatically generated tuning grid. If random search is used, this is the maximum number of tuning combinations. |
+| `form` | Formula specifying the model structure, usually in the form `outcome ~ predictor1 + predictor2 + ...`. |
+| `data` | Data frame containing the variables referenced in the formula or recipe. |
+| `subset` | Index vector specifying which rows should be used in the training sample. |
+| `na.action` | Function specifying what to do when missing values are found. The default is to fail; alternatives such as `na.omit` remove incomplete cases. |
+| `contrasts` | List specifying contrasts for factor variables used in the model formula. |
+
+Not all of the parameters described in **Table 1** will be utilized.
 
 ### `trainControl` Parameters
 ____________________________________________________________________________________________________________
 
-An explanation of the parameters in the `trainControl` object as shown below:
+An explanation of the parameters in the `trainControl` object are described in **Table 2**.
 
-- method = “cv”, number = 10: We are using 10-fold cross validation. We will use this to select our hyperparameters, 𝜆 and α.
-- summaryFunction = twoClassSummary: This tells caret to use a custom summary function to evaluate model performance. twoClassSummary computes:
-  - ROC AUC (Area Under the Curve),
-  - Sensitivity (Recall/TPR),
-  - Specificity (TNR). Note: Your target variable must be a factor with two levels, and the positive class must be the first level of the factor when using twoClassSummary in caret. This is because twoClassSummary treats the first factor level as the positive class. Always check to make sure the first level of the target is the “success” class. You can change the order of the factor levels by reordering the labels.
-- classProbs = TRUE: This tells caret to compute predicted probabilities (not just class labels). Required for metrics like AUC, which need probabilities.
-- savePredictions = TRUE: This tells caret to save the model’s predictions on the training data.
+**Table 2.** A tabulation of the parameters in `trainControl()` and their corresponding descriptions.
 
-```{r}
-ctrl <- trainControl(method = "cv", number = 4,
-                     summaryFunction = twoClassSummary,
-                     classProbs = TRUE,
-                     savePredictions = "final")
-```
+| Parameter | Description |
+|:---|:---|
+| `method` | The resampling method, such as `"boot"`, `"cv"`, `"repeatedcv"`, `"LOOCV"`, `"LGOCV"`, `"none"`, `"oob"`, `"timeslice"`, `"adaptive_cv"`, `"adaptive_boot"`, or `"adaptive_LGOCV"`. |
+| `number` | The number of folds or resampling iterations. |
+| `repeats` | For repeated k-fold cross-validation, the number of complete fold sets to compute. |
+| `p` | For leave-group-out cross-validation, the training percentage. |
+| `search` | Either `"grid"` or `"random"`, describing how the tuning parameter grid is determined. |
+| `initialWindow`, `horizon`, `fixedWindow`, `skip` | Arguments passed to `createTimeSlices()` when `method = "timeslice"`. |
+| `verboseIter` | Logical value indicating whether a training log should be printed. |
+| `returnData` | Logical value indicating whether the training data should be saved. |
+| `returnResamp` | Controls how much resampled summary metric output is saved. Values are `"final"`, `"all"`, or `"none"`. |
+| `savePredictions` | Controls how much holdout prediction output from each resample is saved. Values are `"all"`, `"final"`, or `"none"`. The `"final"` option saves predictions for the optimal tuning parameters. |
+| `classProbs` | Logical value indicating whether class probabilities should be computed for classification models. |
+| `summaryFunction` | Function used to compute performance metrics across resamples. |
+| `selectionFunction` | Function used to select the optimal tuning parameter. |
+| `preProcOptions` | List of options passed to `preProcess()`. The preprocessing method itself is specified in the `preProc` argument of `train()`. |
+| `sampling` | Optional sampling method applied after resampling, usually for class imbalance. Common values include `"none"`, `"down"`, `"up"`, `"smote"`, and `"rose"
 
 ### `tuneGrid` Parameters
 ____________________________________________________________________________________________________________
