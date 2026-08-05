@@ -1784,16 +1784,69 @@ train_pca <- recipes::bake(pca_prep, new_data = train_dummy)
 hold_pca <- recipes::bake(pca_prep, new_data = hold_dummy)
 ```
 
+## *Sample*
+
+The significance of the class imbalance can be exemplified by the following explanation. If a model predicts most loans as non-default, it can obtain high accuracy while failing to identify default cases. Because defaults are the minority class, sampling and threshold tuning are considered as part of the modeling workflow.
+
+### Class Distribution in Training Dataset 
+_____________________________________________________________________________________________________________
+
+The target variable distribution observed shows an imbalanced, which also matches previous observations found from the target variable distributions. 
+
+```{r sample}
+
+```
+
+### Class Distribution in Holdout Dataset
+_____________________________________________________________________________________________________________
+
+For consistency purposes, the target variable distribution of the holdout dataset was also examined. A similar imbalance was observed as found in the training dataset target variable distriibution.
+
+```{r sample}
+
+```
+
+### Sampling Strategy
+_____________________________________________________________________________________________________________
+
+
+
+
+
+## *Exporting & Save Cleaned Data For Modeling*
+
+### Cleaned Training Dataset
+_____________________________________________________________________________________________________________
+
+```{r clean export}
+
+```
+
+### Cleaned Holdout Dataset
+
+```{r clean export}
+
+```
+
 ## *Modeling*
 
-### Workflow
-____________________________________________________________________________________________________________
+### Model Type: Decision Tree Classifier
+_____________________________________________________________________________________________________________
 
+#### Model Package 
+
+
+#### Parameters
+
+
+#### Workflow
+
+
+#### Model Impor
 
 
 ### Evaluation
-____________________________________________________________________________________________________________
-
+_____________________________________________________________________________________________________________
 
 ---
 
