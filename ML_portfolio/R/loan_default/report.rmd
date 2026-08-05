@@ -1212,6 +1212,61 @@ train <- train %>%
   )
 ```
 
+#### Employee Length
+
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    emp_length = forcats::fct_na_value_to_level(factor(emp_length), level = "Missing"),
+    emp_length_numeric = case_when(
+        emp_length == "< 1 year" ~ 0,
+        emp_length == "1 year" ~ 1,
+        emp_length == "2 years" ~ 2,
+        emp_length == "3 years" ~ 3,
+        emp_length == "4 years" ~ 4,
+        emp_length == "5 years" ~ 5,
+        emp_length == "6 years" ~ 6,
+        emp_length == "7 years" ~ 7,
+        emp_length == "8 years" ~ 8,
+        emp_length == "9 years" ~ 9,
+        emp_length == "10+ years" ~ 10,
+        TRUE ~ NA_real_
+      )
+  )
+```
+
+
+#### Home Ownership
+
+```{r data preprocessing}
+train$home_ownership <- as.factor(train$home_ownership)
+```
+
+#### Verification Status
+
+```{r data preprocessing}
+train$verification_status <- as.factor(train$verification_status)
+```
+
+#### Purpose
+
+```{r data preprocessing}
+train$purpose <- as.factor(train$purpose)
+```
+
+#### Initial List Status
+
+```{r data preprocessing}
+train$initial_list_status <- as.factor(train$initial_list_status)
+```
+
+#### Application Type
+
+```{r data preprocessing}
+train$application_type <- as.factor(train$application_type)
+```
+
+
 ### Character-to-Numeric Conversion
 _____________________________________________________________________________________________________________
 
@@ -1222,12 +1277,26 @@ ________________________________________________________________________________
 ### Character-to-Date Conversion
 _____________________________________________________________________________________________________________
 
+The variables `issue_d` and `earliest_cr_line` were parsed using `lubridate`::`my()`. These parsed dates support credit history and loan timing features.
+
+#### Issue Date
+
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    issue_d = lubridate::my(issue_d)
+  )
+```
+
+#### Earliest Credit Line
+
 ```{r data preprocessing}
 
 ```
 
+
 ### Factor-to-Numeric Conversion
-_____________________________________________________________________________________________________________
+___________________w__________________________________________________________________________________________
 
 #### Term Number
 
