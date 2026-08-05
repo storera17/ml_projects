@@ -1554,23 +1554,6 @@ hold_raw <- hold_raw %>%
   )
 ```
 
-### Employment Length Features
-_____________________________________________________________________________________________________________
-
-The variable `emp_length_numeric` converts employment length into an approximate numeric tenure measure. This preserves the ordered nature of employment history while avoiding many separate employment-length dummy variables.
-
-#### Training Dataset
-
-```{r feature engineering}
-
-```
-
-#### Holdout Dataset
-
-```{r feature engineering}
-
-```
-
 ### Sparse Count Binning
 _____________________________________________________________________________________________________________
 
@@ -1579,13 +1562,71 @@ Sparse count variables such as public records, bankruptcies, recent inquiries, a
 #### Training Dataset
 
 ```{r feature engineering}
-
+train_raw <- train_raw %>%
+  mutate(
+    no_delinq_flag = ifelse(is.na(mths_since_last_delinq), 1, 0),
+    mths_since_last_delinq = ifelse(is.na(mths_since_last_delinq), 999, mths_since_last_delinq),
+    pub_rec_group = factor(case_when(
+      pub_rec == 0 ~ "0",
+      pub_rec == 1 ~ "1",
+      pub_rec >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    )),
+    pub_rec_bankruptcies_group = factor(case_when(
+      pub_rec_bankruptcies == 0 ~ "0",
+      pub_rec_bankruptcies == 1 ~ "1",
+      pub_rec_bankruptcies >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    )),
+    inq_last_6mths_group = factor(case_when(
+      inq_last_6mths == 0 ~ "0",
+      inq_last_6mths == 1 ~ "1",
+      inq_last_6mths >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    )),
+    acc_now_delinq_group = factor(ifelse(acc_now_delinq == 0, "No", "Yes")),
+    delinq_2yrs_group = factor(case_when(
+      delinq_2yrs == 0 ~ "0",
+      delinq_2yrs == 1 ~ "1",
+      delinq_2yrs >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    ))
+  )
 ```
 
 #### Holdout Dataset
 
 ```{r feature engineering}
-
+hold_raw <- hold_raw %>%
+  mutate(
+    no_delinq_flag = ifelse(is.na(mths_since_last_delinq), 1, 0),
+    mths_since_last_delinq = ifelse(is.na(mths_since_last_delinq), 999, mths_since_last_delinq),
+    pub_rec_group = factor(case_when(
+      pub_rec == 0 ~ "0",
+      pub_rec == 1 ~ "1",
+      pub_rec >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    )),
+    pub_rec_bankruptcies_group = factor(case_when(
+      pub_rec_bankruptcies == 0 ~ "0",
+      pub_rec_bankruptcies == 1 ~ "1",
+      pub_rec_bankruptcies >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    )),
+    inq_last_6mths_group = factor(case_when(
+      inq_last_6mths == 0 ~ "0",
+      inq_last_6mths == 1 ~ "1",
+      inq_last_6mths >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    )),
+    acc_now_delinq_group = factor(ifelse(acc_now_delinq == 0, "No", "Yes")),
+    delinq_2yrs_group = factor(case_when(
+      delinq_2yrs == 0 ~ "0",
+      delinq_2yrs == 1 ~ "1",
+      delinq_2yrs >= 2 ~ "2+",
+      TRUE ~ "Missing"
+    ))
+  )
 ```
 
 ### Credit History Features
