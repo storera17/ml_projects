@@ -568,16 +568,18 @@ The categorical variables in the training and holdout datasets were examined usi
 #### Frequecy Tables of Categorical Variables in the Training Dataset
 
 ```{r data visualization}
-for (col in names(categorical_vars)) {
-    print(table(categorical_vars[[col]])[1:5])
+for (col in categorical_vars) {
+  print(paste("Top categories for", col, "in Training Dataset:"))
+  print(head(sort(table(train_raw[[col]]), decreasing = TRUE), 5))
 }
 ```
 
 #### Frequecy Tables of Categorical Variables in the Holdout Dataset
 
 ```{r data visualization}
-for (col in names(hold_categorical_vars)) {
-    print(table(hold_categorical_vars[[col]])[1:5])
+for (col in hold_categorical_vars) {
+  print(paste("Top categories for", col, "in Holdout Dataset:"))
+  print(head(sort(table(hold_raw[[col]]), decreasing = TRUE), 5))
 }
 ```
 
@@ -646,20 +648,28 @@ ________________________________________________________________________________
 #### Proportions of Categorical Variables by Loan Default Status in the Training Dataset
 
 ```{r data visualization}
-for (col in names(categorical_vars)) {
-    prop_table <- prop.table(table(train_raw[[col]], train_raw$loan_default), margin = 1)
-    print(paste("Proportions of", col, "by Loan Default Status in Training Dataset:"))
-    print(prop_table)
+for (col in categorical_vars) {
+  prop_table <- prop.table(
+    table(train_raw[[col]], train_raw$loan_default),
+    margin = 1
+  )
+
+  print(paste("Proportions of", col, "by Loan Default Status in Training Dataset:"))
+  print(prop_table)
 }
 ```
 
 #### Proportions of Categorical Variables by Loan Default Status in the Holdout Dataset
 
 ```{r data visualization}
-for (col in names(hold_categorical_vars)) {
-    prop_table <- prop.table(table(hold_raw[[col]], hold_raw$loan_default), margin = 1)
-    print(paste("Proportions of", col, "by Loan Default Status in Holdout Dataset:"))
-    print(prop_table)
+for (col in hold_categorical_vars) {
+  prop_table <- prop.table(
+    table(hold_raw[[col]], hold_raw$loan_default),
+    margin = 1
+  )
+
+  print(paste("Proportions of", col, "by Loan Default Status in Holdout Dataset:"))
+  print(prop_table)
 }
 ```
 
@@ -707,24 +717,26 @@ The strategy employed to detect anomalic values in the numeric variables of the 
 #### Anomalic Values in the Training Dataset
 
 ```{r dqa}
-for (col in names(numeric_vars)) {
-    outliers <- boxplot.stats(train_raw[[col]])$out
-    if (length(outliers) > 0) {
-        print(paste("Anomalic values in", col, "in Training Dataset:"))
-        print(outliers)
-    }
+for (col in numeric_vars) {
+  outliers <- boxplot.stats(train_raw[[col]])$out
+
+  if (length(outliers) > 0) {
+    print(paste("Anomalous values in", col, "in Training Dataset:"))
+    print(head(outliers, 20))
+  }
 }
 ```
 
 #### Anomalic Values in the Holdout Dataset
 
 ```{r dqa}
-for (col in names(hold_numeric_vars)) {
-    outliers <- boxplot.stats(hold_raw[[col]])$out
-    if (length(outliers) > 0) {
-        print(paste("Anomalic values in", col, "in Holdout Dataset:"))
-        print(outliers)
-    }
+for (col in hold_numeric_vars) {
+  outliers <- boxplot.stats(hold_raw[[col]])$out
+
+  if (length(outliers) > 0) {
+    print(paste("Anomalous values in", col, "in Holdout Dataset:"))
+    print(head(outliers, 20))
+  }
 }
 ```
 
@@ -736,48 +748,53 @@ First, the categorical variables in both the training and holdout datasets were 
 #### Inconsistent Values in Categorical Variables in the Training Dataset
 
 ```{r dqa}
-for (col in names(categorical_vars)) {
-    unique_values <- unique(train_raw[[col]])
-    if (length(unique_values) > 10) {
-        print(paste("Inconsistent values in", col, "in Training Dataset:"))
-        print(unique_values)
-    }
+for (col in categorical_vars) {
+  unique_values <- unique(train_raw[[col]])
+
+  if (length(unique_values) > 10) {
+    print(paste("High-cardinality or potentially inconsistent values in", col, "in Training Dataset:"))
+    print(head(unique_values, 20))
+  }
 }
 ```
 
 #### Inconsistent Values in Categorical Variables in the Holdout Dataset
 
 ```{r dqa}
-for (col in names(hold_categorical_vars)) {
-    unique_values <- unique(hold_raw[[col]])
-    if (length(unique_values) > 10) {
-        print(paste("Inconsistent values in", col, "in Holdout Dataset:"))
-        print(unique_values)
-    }
+for (col in hold_categorical_vars) {
+  unique_values <- unique(hold_raw[[col]])
+
+  if (length(unique_values) > 10) {
+    print(paste("High-cardinality or potentially inconsistent values in", col, "in Holdout Dataset:"))
+    print(head(unique_values, 20))
+  }
 }
 ```
 
 #### Inconsistent Values in Numeric Variables in the Training Dataset
 
 ```{r dqa}
-for (col in names(numeric_vars)) {
-    summary_stats <- summary(train_raw[[col]])
-    if (summary_stats["Min."] < 0 || summary_stats["Max."] > 1000000) {
-        print(paste("Inconsistent values in", col, "in Training Dataset:"))
-        print(summary_stats)
-    }
+for (col in numeric_vars) {
+  summary_stats <- summary(train_raw[[col]])
+
+  if (summary_stats["Min."] < 0 || summary_stats["Max."] > 1000000) {
+    print(paste("Potentially inconsistent numeric values in", col, "in Training Dataset:"))
+    print(summary_stats)
+  }
 }
 ```
 
 #### Inconsistent Values in Numeric Variables in the Holdout Dataset
 
 ```{r dqa}
-for (col in names(hold_numeric_vars)) {
-    summary_stats <- summary(hold_raw[[col]])
-    if (summary_stats["Min."] < 0 || summary_stats["Max."] > 1000000) {
-        print(paste("Inconsistent values in", col, "in Holdout Dataset:"))
-        print(summary_stats)
-    }
+for (col in hold_numeric_vars) {
+  summary_stats <- summary(hold_raw[[col]])
+
+  if (summary_stats["Min."] < 0 || summary_stats["Max."] > 1000000) {
+    print(paste("Potentially inconsistent numeric values in", col, "in Holdout Dataset:"))
+    print(summary_stats)
+  }
+}
 ```
 
 ### High Cardinality Assessment
@@ -788,24 +805,26 @@ A categorical variable with a high cardinality is one that has a large number of
 #### High Cardinality Categorical Variables in the Training Dataset
 
 ```{r dqa}
-for (col in names(categorical_vars)) {
-    unique_values <- unique(train_raw[[col]])
-    if (length(unique_values) > 10) {
-        print(paste("High cardinality categorical variable in Training Dataset:", col))
-        print(unique_values)
-    }
+for (col in categorical_vars) {
+  unique_values <- unique(train_raw[[col]])
+
+  if (length(unique_values) > 10) {
+    print(paste("High cardinality categorical variable in Training Dataset:", col))
+    print(head(unique_values, 20))
+  }
 }
 ```
 
 #### High Cardinality Categorical Variables in the Holdout Dataset
 
 ```{r dqa}
-for (col in names(hold_categorical_vars)) {
-    unique_values <- unique(hold_raw[[col]])
-    if (length(unique_values) > 10) {
-        print(paste("High cardinality categorical variable in Holdout Dataset:", col))
-        print(unique_values)
-    }
+for (col in hold_categorical_vars) {
+  unique_values <- unique(hold_raw[[col]])
+
+  if (length(unique_values) > 10) {
+    print(paste("High cardinality categorical variable in Holdout Dataset:", col))
+    print(head(unique_values, 20))
+  }
 }
 ```
 
@@ -1063,7 +1082,7 @@ Categorical fields such as `term`, `emp_length`, `home_ownership`, `verification
 ```{r data preprocessing}
 train_raw <- train_raw %>%
   mutate(
-    term = factor(term, leveels = c("36 months", "60 months"))
+    term = factor(term, levels = c("36 months", "60 months"))
   )
 ```
 
@@ -1177,6 +1196,7 @@ train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
 for (v in num_cols_train) {
   train_raw[[v]][!is.finite(train_raw[[v]])] <- NA_real_
   train_raw[[v]][is.na(train_raw[[v]])] <- train_medians[[v]]
+}
 ```
 
 ### Handling Rare or Sparse Categories
@@ -1230,7 +1250,7 @@ ________________________________________________________________________________
 ```{r data preprocessing}
 hold_raw <- hold_raw %>%
   mutate(
-    term = factor(term, leveels = c("36 months", "60 months"))
+    term = factor(term, levels = c("36 months", "60 months"))
   )
 ```
 
@@ -1292,7 +1312,7 @@ hold_raw$application_type <- as.factor(hold_raw$application_type)
 ##### Term Number
 
 ```{r data hold_raw}
-hold_raw <- train_raw %>%
+hold_raw <- hold_raw %>%
   mutate(
     term_num = readr::parse_number(as.character(term))
   )
@@ -1313,7 +1333,7 @@ hold_raw <- hold_raw %>%
 ##### Issue Date
 
 ```{r data preprocessing}
-hold_raw <- trahold_rawin_raw %>%
+hold_raw <- hold_raw %>%
   mutate(
     issue_d = lubridate::my(issue_d)
   )
@@ -1338,6 +1358,7 @@ train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
 for (v in num_cols_hold) {
   hold_raw[[v]][!is.finite(hold_raw[[v]])] <- NA_real_
   hold_raw[[v]][is.na(hold_raw[[v]])] <- train_medians[[v]]
+}
 ```
 
 #### Handling Rare or Sparse Categories
@@ -1621,7 +1642,7 @@ hold_dummy <- hold_dummy %>% select(-all_of(extra_hold_cols))
 hold_dummy <- hold_dummy %>% select(all_of(names(train_dummy)))
 ```
 
-```{r dimension reduction, eval=FALSE}`
+```{r dimension reduction, eval=FALSE}
 pca_recipe <- recipes::recipe(loan_default ~ ., data = train_dummy) %>%
   recipes::step_zv(all_predictors()) %>%
   recipes::step_normalize(all_numeric_predictors()) %>%
@@ -1649,7 +1670,7 @@ ________________________________________________________________________________
 The target variable distribution observed shows an imbalanced, which also matches previous observations found from the target variable distributions. 
 
 ```{r sample}
-
+table(train$loan_default)
 ```
 
 ### Class Distribution in Holdout Dataset
@@ -1658,7 +1679,7 @@ ________________________________________________________________________________
 For consistency purposes, the target variable distribution of the holdout dataset was also examined. A similar imbalance was observed as found in the training dataset target variable distriibution.
 
 ```{r sample}
-
+table(hold$loan_default)
 ```
 
 ### Sampling Strategy
@@ -1688,7 +1709,7 @@ prop.table(table(train_under$loan_default))
 The holdout dataset is not undersampled. It remains in its natural distribution so final evaluation reflects the type of class balance expected on new loan records.
 
 ```{r sample}
-prop.table(table(hold_clean$loan_default))
+prop.table(table(hold$loan_default))
 ```
 
 ## *Exporting Cleaned Data For Modeling*
@@ -1698,17 +1719,17 @@ ________________________________________________________________________________
 
 ```{r clean export}
 # IMBALANCED TRAINING SET
-saveRDS(train, file = 'train.rds')
+saveRDS(train, file.path(project_dir, 'train.rds'))
 
 # UNDERSAMPLED TRAINING SET
-saveRDS(train_under, file = 'train_under.rds')
+saveRDS(train_under, file.path(project_dir, 'train_under.rds'))
 ```
 
 ### Cleaned Holdout Dataset
 _____________________________________________________________________________________________________________
 
 ```{r clean export}
-saveRDS(hold, file = 'holdout.rds')
+saveRDS(hold, file.path(project_dir, 'holdout.rds'))
 ```
 
 ## *Modeling*
