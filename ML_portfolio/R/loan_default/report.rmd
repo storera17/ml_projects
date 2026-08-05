@@ -1637,13 +1637,23 @@ The variable `fico_score` combines the lower and upper FICO range bounds into an
 #### Training Dataset
 
 ```{r feature engineering}
-
+train_raw <- train_raw %>%
+  mutate(
+    fico_score = (fico_range_low + fico_range_high) / 2,
+    credit_history_days = as.numeric(issue_d - earliest_cr_line),
+    credit_history_years = credit_history_days / 365.25
+  )
 ```
 
 #### Holdout Dataset
 
 ```{r feature engineering}
-
+hold_raw <- hold_raw %>%
+  mutate(
+    fico_score = (fico_range_low + fico_range_high) / 2,
+    credit_history_days = as.numeric(issue_d - earliest_cr_line),
+    credit_history_years = credit_history_days / 365.25
+  )
 ```
 
 ### Date-Based Features
