@@ -1266,12 +1266,25 @@ train$initial_list_status <- as.factor(train$initial_list_status)
 train$application_type <- as.factor(train$application_type)
 ```
 
-
 ### Character-to-Numeric Conversion
 _____________________________________________________________________________________________________________
 
-```{r data preprocessing}
+#### Term Number
 
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    term_num = readr::parse_number(as.character(term))
+  )
+```
+
+#### Employee Length Number
+
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    emp_length_numeric = readr::parse_number(as.character(emp_length))
+  )
 ```
 
 ### Character-to-Date Conversion
@@ -1291,37 +1304,50 @@ train <- train %>%
 #### Earliest Credit Line
 
 ```{r data preprocessing}
-
-```
-
-
-### Factor-to-Numeric Conversion
-___________________w__________________________________________________________________________________________
-
-#### Term Number
-
-This parses the levels within the variable `term`, yielding `36` and `60` as the resulting values for a new variable `term_num`.
-
-```{r data preprocessing}
 train <- train %>%
   mutate(
-    term_num = readr::parse_number(as.character(term))
+    earliest_cr_line = lubridate::my(earliest_cr_line)
   )
 ```
-
 
 ### Missing Value Treatment
 _____________________________________________________________________________________________________________
 
 ```{r data preprocessing}
+num_cols_train <- names(train)[sapply(train, is.numeric)]
 
+train_medians <- sapply(train[num_cols_train], median, na.rm = TRUE)
+
+for (v in num_cols_train) {
+  train[[v]][!is.finite(train[[v]])] <- NA_real_
+  train[[v]][is.na(train[[v]])] <- train_medians[[v]]
 ```
 
 ### Handling Rare or Sparse Categories
 _____________________________________________________________________________________________________________
 
-```{r data preprocessing}
+#### Application Type
 
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    application_type = forcats::fct_collapse(
+      factor(application_type),
+      OTHER = c("JOINT", "DIRECT_PAY")
+    )
+  )
+```
+
+#### Home Ownership
+
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    home_ownership = forcats::fct_collapse(
+      factor(home_ownership),
+      OTHER = c("OTHER", "ANY", "NONE")
+    )
+  )
 ```
 
 ### Removing Unnecessary Variables
