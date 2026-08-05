@@ -1235,7 +1235,6 @@ train_raw <- train_raw %>%
   )
 ```
 
-
 #### Home Ownership
 
 ```{r data preprocessing}
@@ -1369,38 +1368,157 @@ ________________________________________________________________________________
 
 #### Character-to-Factor Conversion
 
+##### Term
+
 ```{r data preprocessing}
-hold
+hold_raw <- hold_raw %>%
+  mutate(
+    term = factor(term, leveels = c("36 months", "60 months"))
+  )
+```
+
+##### Employee Length
+
+```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    emp_length = forcats::fct_na_value_to_level(factor(emp_length), level = "Missing"),
+    emp_length_numeric = case_when(
+        emp_length == "< 1 year" ~ 0,
+        emp_length == "1 year" ~ 1,
+        emp_length == "2 years" ~ 2,
+        emp_length == "3 years" ~ 3,
+        emp_length == "4 years" ~ 4,
+        emp_length == "5 years" ~ 5,
+        emp_length == "6 years" ~ 6,
+        emp_length == "7 years" ~ 7,
+        emp_length == "8 years" ~ 8,
+        emp_length == "9 years" ~ 9,
+        emp_length == "10+ years" ~ 10,
+        TRUE ~ NA_real_
+      )
+  )
+```
+
+##### Home Ownership
+
+```{r data preprocessing}
+hold_raw$home_ownership <- as.factor(hold_raw$home_ownership)
+```
+
+##### Verification Status
+
+```{r data preprocessing}
+hold_raw$verification_status <- as.factor(hold_raw$verification_status)
+```
+
+##### Purpose
+
+```{r data preprocessing}
+hold_raw$purpose <- as.factor(hold_raw$purpose)
+```
+
+##### Initial List Status
+
+```{r data preprocessing}
+hold_raw$initial_list_status <- as.factor(hold_raw$initial_list_status)
+```
+
+##### Application Type
+
+```{r data preprocessing}
+hold_raw$application_type <- as.factor(hold_raw$application_type)
 ```
 
 #### Character-to-Numeric Conversion
 
-```{r data preprocessing}
+##### Term Number
 
+```{r data hold_raw}
+hold_raw <- train_raw %>%
+  mutate(
+    term_num = readr::parse_number(as.character(term))
+  )
 ```
+
+##### Employee Length Number
+
+```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    emp_length_numeric = readr::parse_number(as.character(emp_length))
+  )
+```
+
 
 #### Character-to-Date Conversion
 
-```{r data preprocessing}
+##### Issue Date
 
+```{r data preprocessing}
+hold_raw <- trahold_rawin_raw %>%
+  mutate(
+    issue_d = lubridate::my(issue_d)
+  )
+```
+
+##### Earliest Credit Line
+
+```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    earliest_cr_line = lubridate::my(earliest_cr_line)
+  )
 ```
 
 #### Missing Value Treatment
 
 ```{r data preprocessing}
+num_cols_hold <- names(hold_raw)[sapply(hold_raw, is.numeric)]
 
+train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
+
+for (v in num_cols_hold) {
+  hold_raw[[v]][!is.finite(hold_raw[[v]])] <- NA_real_
+  hold_raw[[v]][is.na(hold_raw[[v]])] <- train_medians[[v]]
 ```
 
 #### Handling Rare or Sparse Categories
 
-```{r data preprocessing}
+##### Application Type
 
+```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    application_type = forcats::fct_collapse(
+      factor(application_type),
+      OTHER = c("JOINT", "DIRECT_PAY")
+    )
+  )
+```
+
+##### Home Ownership
+
+```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    home_ownership = forcats::fct_collapse(
+      factor(home_ownership),
+      OTHER = c("OTHER", "ANY", "NONE")
+    )
+  )
 ```
 
 #### Removing Unnecessary Variables
 
 ```{r data preprocessing}
-
+hold_raw <- hold_raw %>%
+    select(
+      -emp_title,
+      -title,
+      -address,
+      -last_credit_pull_d
+    )
 ```
 
 ## *Feature Engineering*
