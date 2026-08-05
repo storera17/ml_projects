@@ -1206,7 +1206,7 @@ Categorical fields such as `term`, `emp_length`, `home_ownership`, `verification
 #### Term
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     term = factor(term, leveels = c("36 months", "60 months"))
   )
@@ -1215,7 +1215,7 @@ train <- train %>%
 #### Employee Length
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     emp_length = forcats::fct_na_value_to_level(factor(emp_length), level = "Missing"),
     emp_length_numeric = case_when(
@@ -1239,31 +1239,31 @@ train <- train %>%
 #### Home Ownership
 
 ```{r data preprocessing}
-train$home_ownership <- as.factor(train$home_ownership)
+train_raw$home_ownership <- as.factor(train_raw$home_ownership)
 ```
 
 #### Verification Status
 
 ```{r data preprocessing}
-train$verification_status <- as.factor(train$verification_status)
+train_raw$verification_status <- as.factor(train_raw$verification_status)
 ```
 
 #### Purpose
 
 ```{r data preprocessing}
-train$purpose <- as.factor(train$purpose)
+train_raw$purpose <- as.factor(train_raw$purpose)
 ```
 
 #### Initial List Status
 
 ```{r data preprocessing}
-train$initial_list_status <- as.factor(train$initial_list_status)
+train_raw$initial_list_status <- as.factor(train_raw$initial_list_status)
 ```
 
 #### Application Type
 
 ```{r data preprocessing}
-train$application_type <- as.factor(train$application_type)
+train_raw$application_type <- as.factor(train_raw$application_type)
 ```
 
 ### Character-to-Numeric Conversion
@@ -1272,7 +1272,7 @@ ________________________________________________________________________________
 #### Term Number
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     term_num = readr::parse_number(as.character(term))
   )
@@ -1281,7 +1281,7 @@ train <- train %>%
 #### Employee Length Number
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     emp_length_numeric = readr::parse_number(as.character(emp_length))
   )
@@ -1295,7 +1295,7 @@ The variables `issue_d` and `earliest_cr_line` were parsed using `lubridate`::`m
 #### Issue Date
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     issue_d = lubridate::my(issue_d)
   )
@@ -1304,7 +1304,7 @@ train <- train %>%
 #### Earliest Credit Line
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     earliest_cr_line = lubridate::my(earliest_cr_line)
   )
@@ -1314,13 +1314,13 @@ train <- train %>%
 _____________________________________________________________________________________________________________
 
 ```{r data preprocessing}
-num_cols_train <- names(train)[sapply(train, is.numeric)]
+num_cols_train <- names(train_raw)[sapply(train_raw, is.numeric)]
 
-train_medians <- sapply(train[num_cols_train], median, na.rm = TRUE)
+train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
 
 for (v in num_cols_train) {
-  train[[v]][!is.finite(train[[v]])] <- NA_real_
-  train[[v]][is.na(train[[v]])] <- train_medians[[v]]
+  train_raw[[v]][!is.finite(train_raw[[v]])] <- NA_real_
+  train_raw[[v]][is.na(train_raw[[v]])] <- train_medians[[v]]
 ```
 
 ### Handling Rare or Sparse Categories
@@ -1329,7 +1329,7 @@ ________________________________________________________________________________
 #### Application Type
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     application_type = forcats::fct_collapse(
       factor(application_type),
@@ -1341,7 +1341,7 @@ train <- train %>%
 #### Home Ownership
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   mutate(
     home_ownership = forcats::fct_collapse(
       factor(home_ownership),
@@ -1354,7 +1354,7 @@ train <- train %>%
 _____________________________________________________________________________________________________________
 
 ```{r data preprocessing}
-train <- train %>%
+train_raw <- train_raw %>%
   select(
     -emp_title,
     -title,
@@ -1370,7 +1370,7 @@ ________________________________________________________________________________
 #### Character-to-Factor Conversion
 
 ```{r data preprocessing}
-
+hold
 ```
 
 #### Character-to-Numeric Conversion
