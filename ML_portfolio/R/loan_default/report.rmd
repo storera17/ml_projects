@@ -1809,9 +1809,26 @@ For consistency purposes, the target variable distribution of the holdout datase
 ### Sampling Strategy
 _____________________________________________________________________________________________________________
 
+The main sampling option considered is undersampling the majority class. Undersampling creates a balanced training dataset by keeping all default cases and sampling an equal number of non-default cases. This can increase recall for the default class, but it may discard useful information from the majority class. 
 
+The model search compares full-distribution training with undersampled training. The current highest-F1 model was trained on the full training distribution, so the final selected model does not require undersampling.
 
+```{r sample}
+set.seed(123)
 
+maj <- train %>% 
+  filter(loan_default == "No")
+min <- train %>% 
+  filter(loan_default == "Yes")
+
+maj_under <- maj %>% 
+  sample_n(nrow(min))
+
+train_under <- bind_rows(min, maj_under) %>%
+  slice_sample(prop = 1)
+
+prop.table(table(train_under$loan_default))
+```
 
 ## *Exporting & Save Cleaned Data For Modeling*
 
