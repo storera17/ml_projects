@@ -1858,6 +1858,21 @@ saveRDS(hold, file = 'holdout.rds')
 
 ## *Modeling*
 
+### Model Type: Regularized Logistic Regression
+_____________________________________________________________________________________________________________
+
+#### Model Package 
+
+
+#### Parameters
+
+
+#### Workflow
+
+
+#### Model Variants
+
+
 ### Model Type: Decision Tree Classifier
 _____________________________________________________________________________________________________________
 
@@ -1870,7 +1885,67 @@ ________________________________________________________________________________
 #### Workflow
 
 
-#### Model Impor
+#### Model Variants
+
+
+### Model Type: Random Forest Ensemble
+_____________________________________________________________________________________________________________
+
+#### Model Package 
+
+
+#### Parameters
+
+
+#### Workflow
+
+
+#### Model Variants
+
+
+### Model Type: XGBoost Tree Ensemble
+_____________________________________________________________________________________________________________
+
+#### Model Package 
+
+
+#### Parameters
+
+
+#### Workflow
+
+
+#### Model Variants
+
+
+### Model Type: LogBoost Tree Ensemble
+_____________________________________________________________________________________________________________
+
+#### Model Package 
+
+
+#### Parameters
+
+
+#### Workflow
+
+
+#### Model Variants
+
+
+### Model Type: Neural Network
+_____________________________________________________________________________________________________________
+
+#### Model Package 
+
+
+#### Parameters
+
+
+#### Workflow
+
+
+#### Model Variants
 
 
 ### Evaluation
