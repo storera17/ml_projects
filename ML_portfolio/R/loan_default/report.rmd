@@ -1836,19 +1836,24 @@ The holdout dataset is not undersampled. It remains in its natural distribution 
 prop.table(table(hold_clean$loan_default))
 ```
 
-## *Exporting & Save Cleaned Data For Modeling*
+## *Exporting Cleaned Data For Modeling*
 
 ### Cleaned Training Dataset
 _____________________________________________________________________________________________________________
 
 ```{r clean export}
+# IMBALANCED TRAINING SET
+saveRDS(train, file = 'train.rds')
 
+# UNDERSAMPLED TRAINING SET
+saveRDS(train_under, file = 'train_under.rds')
 ```
 
 ### Cleaned Holdout Dataset
+_____________________________________________________________________________________________________________
 
 ```{r clean export}
-
+saveRDS(hold, file = 'holdout.rds')
 ```
 
 ## *Modeling*
