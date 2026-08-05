@@ -1681,7 +1681,7 @@ hold_raw <- hold_raw %>%
   )
 ```
 
-### Final Feature Review
+### Final Cleanup
 _____________________________________________________________________________________________________________
 
 The cleaned dataset has no missing values after preprocessing and contains a mixture of numeric, categorical, and engineered predictors.
@@ -1689,13 +1689,33 @@ The cleaned dataset has no missing values after preprocessing and contains a mix
 #### Training Dataset
 
 ```{r feature engineering}
-skimr::skim(train_raw)
+train_raw <- train_raw %>%
+  select(
+    -issue_d,
+    -earliest_cr_line,
+    -grade,
+    -sub_grade,
+    -fico_range_low,
+    -fico_range_high,
+    -installment,
+    -annual_inc
+  )
 ```
 
 #### Holdout Dataset
 
 ```{r feature engineering}
-
+hold_raw <- hold_raw %>%
+  select(
+    -issue_d,
+    -earliest_cr_line,
+    -grade,
+    -sub_grade,
+    -fico_range_low,
+    -fico_range_high,
+    -installment,
+    -annual_inc
+  )
 ```
 
 ## *Re-Assignment*
