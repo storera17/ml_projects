@@ -1656,23 +1656,6 @@ hold_raw <- hold_raw %>%
   )
 ```
 
-### Date-Based Features
-_____________________________________________________________________________________________________________
-
-Date fields are used to create duration variables instead of being passed directly into models. Duration features are more interpretable and easier for many models to use.
-
-#### Training Dataset
-
-```{r feature engineering}
-
-```
-
-#### Holdout Dataset
-
-```{r feature engineering}
-
-```
-
 ### Ratio Features
 _____________________________________________________________________________________________________________
 
