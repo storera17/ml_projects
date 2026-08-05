@@ -1673,6 +1673,31 @@ Date fields are used to create duration variables instead of being passed direct
 
 ```
 
+### Ratio Features
+_____________________________________________________________________________________________________________
+
+#### Training Dataset
+
+```{r feature engineering}
+train_raw <- train_raw %>%
+  mutate(
+    installment_to_loanamt = installment / pmax(loan_amnt, 1),
+    installment_to_income = installment / pmax(annual_inc, 1),
+    loan_to_income = loan_amnt / pmax(annual_inc, 1)
+  )
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+hold_raw <- hold_raw %>%
+  mutate(
+    installment_to_loanamt = installment / pmax(loan_amnt, 1),
+    installment_to_income = installment / pmax(annual_inc, 1),
+    loan_to_income = loan_amnt / pmax(annual_inc, 1)
+  )
+```
+
 ### Final Feature Review
 _____________________________________________________________________________________________________________
 
