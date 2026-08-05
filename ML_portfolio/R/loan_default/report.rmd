@@ -1354,7 +1354,13 @@ train <- train %>%
 _____________________________________________________________________________________________________________
 
 ```{r data preprocessing}
-
+train <- train %>%
+  select(
+    -emp_title,
+    -title,
+    -address,
+    -last_credit_pull_d
+  )
 ```
 
 
