@@ -1531,13 +1531,27 @@ The variables `grade_score` and `sub_grade_score` translate lender risk grades i
 #### Training Dataset
 
 ```{r feature engineering}
-
+train_raw <- train_raw %>%
+  mutate(
+    grade_score = match(stringr::str_to_upper(stringr::str_trim(grade)), LETTERS[1:7]),
+    sub_grade_score = as.integer(factor(
+      sub_grade,
+      levels = as.vector(outer(LETTERS[1:7], 1:5, paste0))
+    ))
+  )
 ```
 
 #### Holdout Dataset
 
 ```{r feature engineering}
-
+hold_raw <- hold_raw %>%
+  mutate(
+    grade_score = match(stringr::str_to_upper(stringr::str_trim(grade)), LETTERS[1:7]),
+    sub_grade_score = as.integer(factor(
+      sub_grade,
+      levels = as.vector(outer(LETTERS[1:7], 1:5, paste0))
+    ))
+  )
 ```
 
 ### Employment Length Features
