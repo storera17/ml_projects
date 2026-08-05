@@ -1830,6 +1830,12 @@ train_under <- bind_rows(min, maj_under) %>%
 prop.table(table(train_under$loan_default))
 ```
 
+The holdout dataset is not undersampled. It remains in its natural distribution so final evaluation reflects the type of class balance expected on new loan records.
+
+```{r sample}
+prop.table(table(hold_clean$loan_default))
+```
+
 ## *Exporting & Save Cleaned Data For Modeling*
 
 ### Cleaned Training Dataset
