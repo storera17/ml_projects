@@ -1312,6 +1312,8 @@ train_raw <- train_raw %>%
 ### Missing Value Treatment
 _____________________________________________________________________________________________________________
 
+Median imputation was employed as the imputation strategy to handle missing values. Later, this will be done on the holdout dataset. The training data median will be used on the holdout dataset as is standard protocol. 
+
 ```{r data preprocessing}
 num_cols_train <- names(train_raw)[sapply(train_raw, is.numeric)]
 
