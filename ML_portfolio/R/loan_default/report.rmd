@@ -1058,16 +1058,142 @@ ________________________________________________________________________________
 
 It was assumed that data leakage was not a potential problem. However, this will not be the case for real-world examples. Both the training and holdout datasets were examined for possible data leakages.
 
+#### Create Data Leakage Assessment Function
+
+```{r dqa}
+assess_data_leakage <- function(data,
+                                target = "loan_default",
+                                positive_class = "Yes",
+                                negative_class = "No") {
+  leakage_name_patterns <- c(
+    "settlement", "hardship", "recover", "collection", "last",
+    "payment", "pymnt", "status", "default", "chargeoff",
+    "out_prncp", "total_rec", "funded"
+  )
+
+  predictors <- setdiff(names(data), target)
+
+  name_flags <- tibble::tibble(
+    variable = predictors,
+    leakage_name_flag = stringr::str_detect(
+      stringr::str_to_lower(variable),
+      paste(leakage_name_patterns, collapse = "|")
+    )
+  )
+
+  categorical_results <- purrr::map_dfr(predictors, function(v) {
+    if (!(is.character(data[[v]]) || is.factor(data[[v]]))) return(NULL)
+
+    temp <- data %>%
+      mutate(
+        target_value = .data[[target]] == positive_class,
+        predictor_value = as.character(.data[[v]]),
+        predictor_value = ifelse(is.na(predictor_value), "Missing", predictor_value)
+      ) %>%
+      group_by(predictor_value) %>%
+      summarise(
+        n = n(),
+        default_rate = mean(target_value, na.rm = TRUE),
+        .groups = "drop"
+      )
+
+    tibble::tibble(
+      variable = v,
+      variable_type = "categorical",
+      max_default_rate = max(temp$default_rate, na.rm = TRUE),
+      min_default_rate = min(temp$default_rate, na.rm = TRUE),
+      default_rate_spread = max_default_rate - min_default_rate,
+      levels = nrow(temp),
+      suspicious_strength_flag = default_rate_spread >= 0.75
+    )
+  })
+
+  numeric_results <- purrr::map_dfr(predictors, function(v) {
+    if (!is.numeric(data[[v]])) return(NULL)
+
+    temp <- data %>%
+      select(all_of(c(target, v))) %>%
+      filter(!is.na(.data[[target]]), !is.na(.data[[v]]))
+
+    if (nrow(temp) == 0 || length(unique(temp[[v]])) < 2) return(NULL)
+
+    roc_obj <- tryCatch(
+      pROC::roc(
+        response = temp[[target]],
+        predictor = temp[[v]],
+        levels = c(negative_class, positive_class),
+        direction = "<",
+        quiet = TRUE
+      ),
+      error = function(e) NULL
+    )
+
+    if (is.null(roc_obj)) return(NULL)
+
+    auc_value <- as.numeric(pROC::auc(roc_obj))
+    auc_value <- max(auc_value, 1 - auc_value)
+
+    tibble::tibble(
+      variable = v,
+      variable_type = "numeric",
+      auc = auc_value,
+      suspicious_strength_flag = auc_value >= 0.90
+    )
+  })
+
+  bind_rows(categorical_results, numeric_results) %>%
+    left_join(name_flags, by = "variable") %>%
+    mutate(
+      possible_leakage_flag = leakage_name_flag | suspicious_strength_flag
+    ) %>%
+    arrange(desc(possible_leakage_flag), desc(suspicious_strength_flag))
+}
+```
+
 #### Data Laakage Assessment of Training Dataset
 
 ```{r dqa}
+train_leakage_assessment <- assess_data_leakage(
+  data = train_raw,
+  target = "loan_default",
+  positive_class = "Yes",
+  negative_class = "No"
+)
 
+train_leakage_assessment %>%
+  filter(possible_leakage_flag) %>%
+  mutate(
+    default_rate_spread = ifelse(
+      is.na(default_rate_spread),
+      NA,
+      scales::percent(default_rate_spread, accuracy = 0.1)
+    ),
+    auc = round(auc, 3)
+  ) %>%
+  knitr::kable(caption = "Potential Data Leakage Flags in Training Data")
 ```
 
 #### Data Leakage Assessment of Holdout Dataset
 
 ```{r dqa}
+holdout_leakage_assessment <- assess_data_leakage(
+  data = hold_raw,
+  target = "loan_default",
+  positive_class = "Yes",
+  negative_class = "No"
+)
 
+holdout_leakage_assessment %>%
+  filter(possible_leakage_flag) %>%
+  mutate(
+    default_rate_spread = ifelse(
+      is.na(default_rate_spread),
+      NA,
+      scales::percent(default_rate_spread, accuracy = 0.1)
+    ),
+    auc = round(auc, 3)
+  ) %>%
+  knitr::kable(caption = "Potential Data Leakage Flags in Holdout Data")
 ```
 
 ## *Data Preprocessing*
