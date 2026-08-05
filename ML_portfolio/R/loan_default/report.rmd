@@ -1863,14 +1863,24 @@ ________________________________________________________________________________
 
 #### Model Package 
 
+The logistic regression model used was derived from the 
 
 #### Parameters
+
 
 
 #### Workflow
 
 
 #### Model Variants
+
+##### L1-Regularization Logistic Regression Model
+
+
+##### L2-Regularization Logistic Regression Model
+
+
+##### Elastic Net Regularization Logistic Regression Model
 
 
 #### Model Imports
