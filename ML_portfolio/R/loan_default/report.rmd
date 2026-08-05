@@ -1201,8 +1201,15 @@ holdout_leakage_assessment %>%
 ### Character-to-Factor Conversion
 _____________________________________________________________________________________________________________
 
-```{r data preprocessing}
+Categorical fields such as `term`, `emp_length`, `home_ownership`, `verification_status`, `purpose`, `initial_list_status`, and `application_type` are treated as categorical predictors. Some categorical fields are also converted into ordered or numeric scores when their ordering has business meaning.
 
+#### Term
+
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    term = factor(term, leveels = c("36 months", "60 months"))
+  )
 ```
 
 ### Character-to-Numeric Conversion
@@ -1218,6 +1225,21 @@ ________________________________________________________________________________
 ```{r data preprocessing}
 
 ```
+
+### Factor-to-Numeric Conversion
+_____________________________________________________________________________________________________________
+
+#### Term Number
+
+This parses the levels within the variable `term`, yielding `36` and `60` as the resulting values for a new variable `term_num`.
+
+```{r data preprocessing}
+train <- train %>%
+  mutate(
+    term_num = readr::parse_number(as.character(term))
+  )
+```
+
 
 ### Missing Value Treatment
 _____________________________________________________________________________________________________________
