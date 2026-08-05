@@ -41,17 +41,12 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE, message=FALSE}
-knitr::opts_chunk$set(echo=True,
-                      message=FALSE,
-                      warning=FAALSE)
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo=TRUE,message=FALSE,warning=FALSE)
+knitr::opts_chunk$set(fig_width=6,fig_height=4)
 
-knitr::opts_chunk$set(fig_width=6,
-                      fig_height=4,
-                      #fig_caption=not_applicable_yet
-                      )
-
-if(required(pacman)==0)
-    {install.packaghes("pacman)}
+if(require(pacman)==0)
+    {install.packaghes("pacman")}
 
 pacman::p_load(
     caret,
