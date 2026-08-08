@@ -402,10 +402,52 @@ log_ridge <- caret::train(
 )
 ```
 
+```{r ridge}
+log_ridge
+```
+
+```{r ridge}
+log_ridge$bestTune
+```
+
 ### Predict on Holdout Dataset
 ____________________________________________________________________________________________________________
 
+#### Predict Probabilities
 
+```{r ridge}
+ridge_prob <- predict(
+  model = log_ridge,
+  newdata = hold_logit,
+  type = "prob"
+)[, "Yes"]
+```
+
+#### Predict Class
+
+```{r ridge}
+ridge_pred <- predict(
+  model = log_lasso,
+  newdata = hold_logit,
+  type = "raw"
+)
+```
+
+#### Tabulate Predictions
+
+```{r ridge}
+ridge_predictions <- tibble::tibble(
+  actual = hold_logit$loan_default,
+  predicted = ridge_pred,
+  probability_yes = ridge_prob
+)
+```
+
+#### Preview Table
+
+```{r ridge}
+head(ridge_predictions)
+```
 
 ### Evaluate
 ____________________________________________________________________________________________________________
