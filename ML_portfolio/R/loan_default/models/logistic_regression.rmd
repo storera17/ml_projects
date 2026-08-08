@@ -325,18 +325,12 @@ head(lasso_predictions)
 ### Evaluate
 ____________________________________________________________________________________________________________
 
-#### evaluate_classifier 
-
 ```{r lasso}
-
-```
-
-```{r lasso}
-
-```
-
-```{r lasso}
-
+lasso_metrics <- evaluate_classifier(
+  actual(lasso_predictions$actual,
+  predicted = lasso_predictions$predicted,
+  probability_yes = lasso_predictions$probability_yes)
+)
 ```
 
 ### Store & Export
