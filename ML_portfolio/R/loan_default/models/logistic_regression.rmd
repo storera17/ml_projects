@@ -553,7 +553,7 @@ elastic_prob <- predict(
 
 ```{r elastic}
 elastic_pred <- predict(
-  model = elastic_lasso,
+  model = log_elastic,
   newdata = hold_logit,
   type = "raw"
 )
@@ -872,7 +872,7 @@ ctrl <- trainControl(method = "cv",
 #### Set Up `tuneGrid()`
 
 ```{r elastic}
-elastic_grid <- expand.grid(
+elastic_grid_us <- expand.grid(
   alpha = seq(0.1, 0.9, length = 5),
   lambda = seq(0.001, 0.1, length = 5)
 )
@@ -884,23 +884,23 @@ ________________________________________________________________________________
 ```{r elastic}
 set.seed(123)
 
-log_elastic <- caret::train(
+log_elastic_us <- caret::train(
   loan_default ~ .,
-  data = train_logit,
+  data = train_under_logit,
   method = "glmnet",
   trControl = ctrl,
-  tuneGrid = elastic_grid,
+  tuneGrid = elastic_grid_us,
   metric = "ROC",
   family = "binomial"
 )
 ```
 
 ```{r elastic}
-log_elastic
+log_elastic_us
 ```
 
 ```{r elastic}
-log_elastic$bestTune
+log_elastic_us$bestTune
 ```
 
 ### Predict on Holdout Dataset
@@ -910,8 +910,8 @@ ________________________________________________________________________________
 #### Predict Probabilities
 
 ```{r elastic}
-elastic_prob <- predict(
-  model = log_elastic,
+elastic_prob_us <- predict(
+  model = log_elastic_us,
   newdata = hold_logit,
   type = "prob"
 )[, "Yes"]
@@ -920,8 +920,8 @@ elastic_prob <- predict(
 #### Predict Class
 
 ```{r elastic}
-elastic_pred <- predict(
-  model = elastic_lasso,
+elastic_pred_us <- predict(
+  model = log_elastic_us,
   newdata = hold_logit,
   type = "raw"
 )
@@ -930,27 +930,27 @@ elastic_pred <- predict(
 #### Tabulate Predictions
 
 ```{r elastic}
-elastic_predictions <- tibble::tibble(
+elastic_predictions_us <- tibble::tibble(
   actual = hold_logit$loan_default,
-  predicted = elastic_pred,
-  probability_yes = elastic_prob
+  predicted = elastic_pred_us,
+  probability_yes = elastic_prob_us
 )
 ```
 
 #### Preview Table
 
 ```{r elastic}
-head(elastic_predictions)
+head(elastic_predictions_us)
 ```
 
 ### Evaluate
 ____________________________________________________________________________________________________________
 
 ```{r elastic}
-elastic_metrics <- evaluate_classifier(
-  actual = elastic_predictions$actual,
-  predicted = elastic_predictions$predicted,
-  probability_yes = elastic_predictions$probability_yes
+elastic_metrics_us <- evaluate_classifier(
+  actual = elastic_predictions_us$actual,
+  predicted = elastic_predictions_us$predicted,
+  probability_yes = elastic_predictions_us$probability_yes
 )
 ```
 
@@ -960,20 +960,20 @@ ________________________________________________________________________________
 #### Save Model
 
 ```{r elastic}
-saveRDS(log_elastic, file.path(project_dir, "log_elastic_model.rds"))
+saveRDS(log_elastic_us, file.path(project_dir, "log_elastic_undersampled_model.rds"))
 ```
 
 #### Save Results
 
 ```{r ridge}
-elastic_results <- elastic_metrics %>%
+elastic_results_us <- elastic_metrics_us %>%
   mutate(
     model_type = "Logistic Regression",
     regularization = "Elastic Net",
-    sample = "Full",
-    alpha = log_elastic$bestTune$alpha,
-    lambda = log_elastic$bestTune$lambda
+    sample = "Undersampled",
+    alpha = log_elastic_us$bestTune$alpha,
+    lambda = log_elastic_us$bestTune$lambda
   )
 
-saveRDS(elastic_results file.path(project_dir, "log_elastic_results.rds"))
+saveRDS(elastic_results_us file.path(project_dir, "log_elastic_undersampled_results.rds"))
 ```
