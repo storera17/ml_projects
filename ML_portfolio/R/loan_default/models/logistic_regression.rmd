@@ -336,7 +336,26 @@ lasso_metrics <- evaluate_classifier(
 ### Store & Export
 ____________________________________________________________________________________________________________
 
+#### Save Model
 
+```{r lasso}
+saveRDS(log_lasso, file.path(project_dir, "log_lasso_model.rds"))
+```
+
+#### Save Results
+
+```{r lasso}
+lasso_results <- lasso_metrics %>%
+  mutate(
+    model_type = "Logistic Regression",
+    regularization = "Lasso",
+    sample = "Full",
+    alpha = log_lasso$bestTune$alpha,
+    lambda = log_lasso$bestTune$lambda
+  )
+
+saveRDS(lasso_results, file.path(project_dir, "log_lasso_results.rds"))
+```
 
 ## *Logistic Regression Model - Ridge Regularization*
 
