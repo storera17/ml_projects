@@ -95,7 +95,7 @@ skimr::skim(hold)
 
 ## *Explanation of the Parameters*
 
-### `train` Parameters
+### `train()` Parameters
 ____________________________________________________________________________________________________________
 
 The `carat` package contains the function `train()` that sets up a grid of tuning parameters for a number of classification and regression routines, fits each model, and calculates a resampling based performance measure. This function fits predictive models over different tuning parameters. The different tuning parameters are described in **Table 1**. These parameters were utilized to perform logistic regression. The particular parameter that enables logistic regression in the `train()` function is `method`. Setting `method` to `glmnet` runs a logistic regression model.
@@ -123,7 +123,7 @@ The `carat` package contains the function `train()` that sets up a grid of tunin
 
 Not all of the parameters described in **Table 1** will be utilized.
 
-### `trainControl` Parameters
+### `trainControl()` Parameters
 ____________________________________________________________________________________________________________
 
 An explanation of the parameters in the `trainControl` object are described in **Table 2**.
@@ -148,22 +148,70 @@ An explanation of the parameters in the `trainControl` object are described in *
 | `preProcOptions` | List of options passed to `preProcess()`. The preprocessing method itself is specified in the `preProc` argument of `train()`. |
 | `sampling` | Optional sampling method applied after resampling, usually for class imbalance. Common values include `"none"`, `"down"`, `"up"`, `"smote"`, and `"rose"
 
-### `tuneGrid` Parameters
-____________________________________________________________________________________________________________
+### `tuneGrid()` Parameters
+___________________________________________________________________________________________________________
 
+The `tuneGrid` arguement utilizes the `expand.grid()` function with two nested `seq()` functions. Together, these functions work as a grid search for specific parameters. 
+
+- alpha = 1: Sets the model to LASSO regression.
+- tuneGrid: This creates a grid of lambda values for cv.
+  - Small lambda → less penalty → model behaves more like plain logistic regression.
+  - Large lambda → more shrinkage → more coefficients get pushed toward zero.
 
 
 ## *Logistic Regression Model - Lasso Regularization*
 
-### Determine Optimal Parameters
+### Determine Parameters
 ____________________________________________________________________________________________________________
 
+#### Set Up `trainControl()`
+
+```{r lasso}
+ctrl <- trainControl(method = "cv", 
+                     number = 4,
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     savePredictions = "final")
+```
+
+#### Set Up `tuneGrid()`
+
+```{r lasso}
+grid <- expand.grid(
+  alpha = seq(0, 1, length = 10),
+  lambda = seq(0.001, 0.1, length = 5)
+)
+```
 
 
-### Fit Model
+### Model Fitting
 ____________________________________________________________________________________________________________
 
+#### Fit Model on Imbalanced Training Dataset
 
+```{r lasso}
+log_lasso <- caret::train(
+  loan_default ~ .,
+  data = train,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = grid,
+  metric = "ROC",
+  family = "binomial")
+```
+
+#### Fit Model on Undersampled Training Dataset
+
+```{r lasso}
+log_lasso_under <- caret::train(
+  loan_default ~ .,
+  data = train_under,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = grid,
+  metric = "ROC",
+  family = "binomial")
+```
 
 ### Predict on Holdout Dataset
 ____________________________________________________________________________________________________________
@@ -453,37 +501,10 @@ train_us <- dplyr::bind_rows(min, maj_under) %>% dplyr::slice_sample(prop = 1)
 prop.table(table(train_us$loan_default))
 ```
 
-## Fit a Logistic Regression Model Using Lasso Selection with caret
-### Set up a trainControl object
-```{r}
-ctrl <- trainControl(method = "cv", number = 4,
-                     summaryFunction = twoClassSummary,
-                     classProbs = TRUE,
-                     savePredictions = "final")
-```
-- method = “cv”, number = 10: We are using 10-fold cross validation. We will use this to select our hyperparameters, 𝜆 and α.
-- summaryFunction = twoClassSummary: This tells caret to use a custom summary function to evaluate model performance. twoClassSummary computes:
-  - ROC AUC (Area Under the Curve),
-  - Sensitivity (Recall/TPR),
-  - Specificity (TNR). Note: Your target variable must be a factor with two levels, and the positive class must be the first level of the factor when using twoClassSummary in caret. This is because twoClassSummary treats the first factor level as the positive class. Always check to make sure the first level of the target is the “success” class. You can change the order of the factor levels by reordering the labels.
-- classProbs = TRUE: This tells caret to compute predicted probabilities (not just class labels). Required for metrics like AUC, which need probabilities.
-- savePredictions = TRUE: This tells caret to save the model’s predictions on the training data.
 
 ### Fit the Model
 We  used the seq() function to the optimal values for alpha and lambda, respectively.
-```{r}
-logit_fit_us <- caret::train(
-  loan_default ~ .,
-  data = train_us,
-  method = "glmnet",
-  trControl = ctrl,
-  tuneGrid = expand.grid(
-    alpha = seq(0, 1, length=10),
-    lambda = seq(.001,.1, length=5)),
-  metric = "ROC",
-  family = "binomial"
-)
-```
+
 **Explanation of the tuneGrid argument**
 - alpha = 1: Sets the model to LASSO regression.
 - tuneGrid: This creates a grid of lambda values for cv.
