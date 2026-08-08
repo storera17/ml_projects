@@ -463,7 +463,26 @@ ridge_metrics <- evaluate_classifier(
 ### Store & Export
 ____________________________________________________________________________________________________________
 
+#### Save Model
 
+```{r ridge}
+saveRDS(log_ridge, file.path(project_dir, "log_ridge_model.rds"))
+```
+
+#### Save Results
+
+```{r ridge}
+ridge_results <- lasso_metrics %>%
+  mutate(
+    model_type = "Logistic Regression",
+    regularization = "Ridge",
+    sample = "Full",
+    alpha = log_ridge$bestTune$alpha,
+    lambda = log_ridge$bestTune$lambda
+  )
+
+saveRDS(ridge_results, file.path(project_dir, "log_ridge_results.rds"))
+```
 
 ## *Logistic Regression Model - Elastic Net Regularization*
 
