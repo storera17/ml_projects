@@ -427,7 +427,7 @@ ridge_prob <- predict(
 
 ```{r ridge}
 ridge_pred <- predict(
-  model = log_lasso,
+  model = log_ridge,
   newdata = hold_logit,
   type = "raw"
 )
@@ -734,30 +734,128 @@ saveRDS(lasso_results_us, file.path(project_dir, "log_lasso_undersampled_results
 
 ## *Logistic Regression Model - Ridge Regularization - Undersample*
 
-### Determine Optimal Parameters
+### Determine Parameters
 ____________________________________________________________________________________________________________
 
+Ridge regularization fits a logistic regression model with an L2 penalty. Unlike lasso, ridge does not usually force coefficients exactly to zero. Instead, it shrinks coefficients toward zero, which can improve stability when predictors are correlated.
 
+#### Set Up `trainControl()`
+
+```{r ridge}
+ctrl <- trainControl(method = "cv", 
+                     number = 4,
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     savePredictions = "final")
+```
+
+#### Set Up `tuneGrid()`
+
+```{r ridge}
+ridge_grid_us <- expand.grid(
+  alpha = 0,
+  lambda = seq(0.001, 0.1, length = 5)
+)
+```
 
 ### Fit Model
 ____________________________________________________________________________________________________________
 
+```{r ridge}
+set.seed(123)
 
+log_ridge_us <- caret::train(
+  loan_default ~ .,
+  data = train_under_logit,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = ridge_grid_us,
+  metric = "ROC",
+  family = "binomial"
+)
+```
+
+```{r ridge}
+log_ridge_us
+```
+
+```{r ridge}
+log_ridge_us$bestTune
+```
 
 ### Predict on Holdout Dataset
 ____________________________________________________________________________________________________________
 
+#### Predict Probabilities
 
+```{r ridge}
+ridge_prob_us <- predict(
+  model = log_ridge_us,
+  newdata = hold_logit,
+  type = "prob"
+)[, "Yes"]
+```
+
+#### Predict Class
+
+```{r ridge}
+ridge_pred_us <- predict(
+  model = log_ridge_us,
+  newdata = hold_logit,
+  type = "raw"
+)
+```
+
+#### Tabulate Predictions
+
+```{r ridge}
+ridge_predictions_us <- tibble::tibble(
+  actual = hold_logit$loan_default,
+  predicted = ridge_pred_us,
+  probability_yes = ridge_prob_us
+)
+```
+
+#### Preview Table
+
+```{r ridge}
+head(ridge_predictions_us)
+```
 
 ### Evaluate
 ____________________________________________________________________________________________________________
 
-
+```{r ridge}
+ridge_metrics_us <- evaluate_classifier(
+  actual = ridge_predictions_us$actual,
+  predicted = ridge_predictions_us$predicted,
+  probability_yes = ridge_predictions_us$probability_yes
+)
+```
 
 ### Store & Export
 ____________________________________________________________________________________________________________
 
+#### Save Model
 
+```{r ridge}
+saveRDS(log_ridge_us, file.path(project_dir, "log_ridge_undersampled_model.rds"))
+```
+
+#### Save Results
+
+```{r ridge}
+ridge_results_us <- ridge_metrics_us %>%
+  mutate(
+    model_type = "Logistic Regression",
+    regularization = "Ridge",
+    sample = "Undersampled",
+    alpha = log_ridge_us$bestTune$alpha,
+    lambda = log_ridge_us$bestTune$lambda
+  )
+
+saveRDS(ridge_results_us, file.path(project_dir, "log_ridge_undersampled_results.rds"))
+```
 
 ## *Logistic Regression Model - Elastic Net Regularization - Undersample*
 
