@@ -1075,16 +1075,7 @@ holdout_leakage_assessment %>%
 ### Character-to-Factor Conversion
 _____________________________________________________________________________________________________________
 
-Categorical fields such as `term`, `emp_length`, `home_ownership`, `verification_status`, `purpose`, `initial_list_status`, and `application_type` are treated as categorical predictors. Some categorical fields are also converted into ordered or numeric scores when their ordering has business meaning.
-
-#### Term
-
-```{r data preprocessing}
-train_raw <- train_raw %>%
-  mutate(
-    term = factor(term, levels = c("36 months", "60 months"))
-  )
-```
+Categorical fields such as `emp_length`, `home_ownership`, `verification_status`, `purpose`, `initial_list_status`, and `application_type` are treated as categorical predictors. Some categorical fields are also converted into ordered or numeric scores when their ordering has business meaning.
 
 #### Employee Length
 
@@ -1139,31 +1130,35 @@ train_raw$initial_list_status <- as.factor(train_raw$initial_list_status)
 train_raw$application_type <- as.factor(train_raw$application_type)
 ```
 
+#### Hardship Flag
+
+```{r data preprocessing}
+train_raw$hardship_flag <- as.factor(train_raw$hardship_flag)
+```
+
+#### Debt Settlement Flag
+
+```{r data preprocessing}
+train_raw$debt_settlement_flag <- as.factor(train_raw$debt_settlement_flag)
+```
+
+
 ### Character-to-Numeric Conversion
 _____________________________________________________________________________________________________________
 
-#### Term Number
+#### Term
 
 ```{r data preprocessing}
 train_raw <- train_raw %>%
   mutate(
-    term_num = readr::parse_number(as.character(term))
-  )
-```
-
-#### Employee Length Number
-
-```{r data preprocessing}
-train_raw <- train_raw %>%
-  mutate(
-    emp_length_numeric = readr::parse_number(as.character(emp_length))
+    term = readr::parse_number(as.character(term))
   )
 ```
 
 ### Character-to-Date Conversion
 _____________________________________________________________________________________________________________
 
-The variables `issue_d` and `earliest_cr_line` were parsed using `lubridate`::`my()`. These parsed dates support credit history and loan timing features.
+The variables `issue_d`,  `earliest_cr_line`, and `last_credit_pull_d` were parsed using `lubridate`::`my()`. These parsed dates support credit history and loan timing features.
 
 #### Issue Date
 
@@ -1183,12 +1178,27 @@ train_raw <- train_raw %>%
   )
 ```
 
+#### Last Credit Pull Date
+
+```{r data preprocessing}
+train_raw <- train_raw %>%
+  mutate(
+    last_credit_pull_d = lubridate::my(last_credit_pull_d)
+  )
+```
+
+
 ### Missing Value Treatment
 _____________________________________________________________________________________________________________
 
 Median imputation was employed as the imputation strategy to handle missing values. Later, this will be done on the holdout dataset. The training data median will be used on the holdout dataset as is standard protocol. 
 
 ```{r data preprocessing}
+train_raw <- train_raw %>%
+  mutate(
+    no_delinq_history_flag = ifelse(is.na(mths_since_last_delinq), 1, 0),
+    mths_since_last_delinq = ifelse(is.na(mths_since_last_delinq), 999, mths_since_last_delinq))
+
 num_cols_train <- names(train_raw)[sapply(train_raw, is.numeric)]
 
 train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
@@ -1233,9 +1243,7 @@ ________________________________________________________________________________
 train_raw <- train_raw %>%
   select(
     -emp_title,
-    -title,
-    -address,
-    -last_credit_pull_d
+    -title
   )
 ```
 
@@ -1245,14 +1253,6 @@ ________________________________________________________________________________
 
 #### Character-to-Factor Conversion
 
-##### Term
-
-```{r data preprocessing}
-hold_raw <- hold_raw %>%
-  mutate(
-    term = factor(term, levels = c("36 months", "60 months"))
-  )
-```
 
 ##### Employee Length
 
@@ -1307,26 +1307,28 @@ hold_raw$initial_list_status <- as.factor(hold_raw$initial_list_status)
 hold_raw$application_type <- as.factor(hold_raw$application_type)
 ```
 
-#### Character-to-Numeric Conversion
+##### Hardship Flag
 
-##### Term Number
-
-```{r data hold_raw}
-hold_raw <- hold_raw %>%
-  mutate(
-    term_num = readr::parse_number(as.character(term))
-  )
+```{r data preprocessing}
+hold_raw$hardship_flag <- as.factor(hold_raw$hardship_flag)
 ```
 
-##### Employee Length Number
+##### Debt Settlement Flag
+
+```{r data preprocessing}
+hold_raw$debt_settlement_flag <- as.factor(hold_raw$debt_settlement_flag)
+```
+
+#### Character-to-Numeric Conversion
+
+##### Term
 
 ```{r data preprocessing}
 hold_raw <- hold_raw %>%
   mutate(
-    emp_length_numeric = readr::parse_number(as.character(emp_length))
+    term= readr::parse_number(as.character(term))
   )
 ```
-
 
 #### Character-to-Date Conversion
 
@@ -1348,9 +1350,23 @@ hold_raw <- hold_raw %>%
   )
 ```
 
+##### Last Credit Pull Date
+
+```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    last_credit_pull_d = lubridate::my(last_credit_pull_d)
+  )
+```
+
 #### Missing Value Treatment
 
 ```{r data preprocessing}
+hold_raw <- hold_raw %>%
+  mutate(
+    no_delinq_history_flag = ifelse(is.na(mths_since_last_delinq), 1, 0),
+    mths_since_last_delinq = ifelse(is.na(mths_since_last_delinq), 999, mths_since_last_delinq))
+
 num_cols_hold <- names(hold_raw)[sapply(hold_raw, is.numeric)]
 
 train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
@@ -1393,9 +1409,7 @@ hold_raw <- hold_raw %>%
 hold_raw <- hold_raw %>%
     select(
       -emp_title,
-      -title,
-      -address,
-      -last_credit_pull_d
+      -title
     )
 ```
 
@@ -1442,33 +1456,21 @@ Sparse count variables such as public records, bankruptcies, recent inquiries, a
 ```{r feature engineering}
 train_raw <- train_raw %>%
   mutate(
-    no_delinq_flag = ifelse(is.na(mths_since_last_delinq), 1, 0),
-    mths_since_last_delinq = ifelse(is.na(mths_since_last_delinq), 999, mths_since_last_delinq),
     pub_rec_group = factor(case_when(
       pub_rec == 0 ~ "0",
       pub_rec == 1 ~ "1",
       pub_rec >= 2 ~ "2+",
       TRUE ~ "Missing"
     )),
-    pub_rec_bankruptcies_group = factor(case_when(
-      pub_rec_bankruptcies == 0 ~ "0",
-      pub_rec_bankruptcies == 1 ~ "1",
-      pub_rec_bankruptcies >= 2 ~ "2+",
-      TRUE ~ "Missing"
-    )),
-    inq_last_6mths_group = factor(case_when(
+    recent_inquiry_group = factor(case_when(
+      is.na(inq_last_6mths) ~ "Missing",
       inq_last_6mths == 0 ~ "0",
       inq_last_6mths == 1 ~ "1",
-      inq_last_6mths >= 2 ~ "2+",
-      TRUE ~ "Missing"
+     TRUE ~ "2+"
     )),
-    acc_now_delinq_group = factor(ifelse(acc_now_delinq == 0, "No", "Yes")),
-    delinq_2yrs_group = factor(case_when(
-      delinq_2yrs == 0 ~ "0",
-      delinq_2yrs == 1 ~ "1",
-      delinq_2yrs >= 2 ~ "2+",
-      TRUE ~ "Missing"
-    ))
+    any_pub_record = factor(ifelse(pub_rec > 0, "Yes", "No")),
+    any_bankruptcy = factor(ifelse(pub_rec_bankruptcies > 0, "Yes", "No")),
+    any_current_delinq = factor(ifelse(acc_now_delinq > 0, "Yes", "No"))
   )
 ```
 
@@ -1477,33 +1479,21 @@ train_raw <- train_raw %>%
 ```{r feature engineering}
 hold_raw <- hold_raw %>%
   mutate(
-    no_delinq_flag = ifelse(is.na(mths_since_last_delinq), 1, 0),
-    mths_since_last_delinq = ifelse(is.na(mths_since_last_delinq), 999, mths_since_last_delinq),
     pub_rec_group = factor(case_when(
       pub_rec == 0 ~ "0",
       pub_rec == 1 ~ "1",
       pub_rec >= 2 ~ "2+",
       TRUE ~ "Missing"
     )),
-    pub_rec_bankruptcies_group = factor(case_when(
-      pub_rec_bankruptcies == 0 ~ "0",
-      pub_rec_bankruptcies == 1 ~ "1",
-      pub_rec_bankruptcies >= 2 ~ "2+",
-      TRUE ~ "Missing"
-    )),
-    inq_last_6mths_group = factor(case_when(
+    recent_inquiry_group = factor(case_when(
+      is.na(inq_last_6mths) ~ "Missing",
       inq_last_6mths == 0 ~ "0",
       inq_last_6mths == 1 ~ "1",
-      inq_last_6mths >= 2 ~ "2+",
-      TRUE ~ "Missing"
+      TRUE ~ "2+"
     )),
-    acc_now_delinq_group = factor(ifelse(acc_now_delinq == 0, "No", "Yes")),
-    delinq_2yrs_group = factor(case_when(
-      delinq_2yrs == 0 ~ "0",
-      delinq_2yrs == 1 ~ "1",
-      delinq_2yrs >= 2 ~ "2+",
-      TRUE ~ "Missing"
-    ))
+    any_pub_record = factor(ifelse(pub_rec > 0, "Yes", "No")),
+    any_bankruptcy = factor(ifelse(pub_rec_bankruptcies > 0, "Yes", "No")),
+    any_current_delinq = factor(ifelse(acc_now_delinq > 0, "Yes", "No"))
   )
 ```
 
@@ -1518,8 +1508,11 @@ The variable `fico_score` combines the lower and upper FICO range bounds into an
 train_raw <- train_raw %>%
   mutate(
     fico_score = (fico_range_low + fico_range_high) / 2,
-    credit_history_days = as.numeric(issue_d - earliest_cr_line),
-    credit_history_years = credit_history_days / 365.25
+    fico_range_width = fico_range_high - fico_range_low,
+    issue_year = lubridate::year(issue_d),
+    credit_history_days_at_issue = as.numeric(issue_d - earliest_cr_line),
+    credit_history_years_at_issue = credit_history_days_at_issue / 365.25,
+    last_pull_after_issue_days = as.numeric(last_credit_pull_d - issue_d)
   )
 ```
 
@@ -1529,8 +1522,11 @@ train_raw <- train_raw %>%
 hold_raw <- hold_raw %>%
   mutate(
     fico_score = (fico_range_low + fico_range_high) / 2,
-    credit_history_days = as.numeric(issue_d - earliest_cr_line),
-    credit_history_years = credit_history_days / 365.25
+    fico_range_width = fico_range_high - fico_range_low,
+    issue_year = lubridate::year(issue_d),
+    credit_history_days_at_issue = as.numeric(issue_d - earliest_cr_line),
+    credit_history_years_at_issue = credit_history_days_at_issue / 365.25,
+    last_pull_after_issue_days = as.numeric(last_credit_pull_d - issue_d)
   )
 ```
 
@@ -1542,9 +1538,11 @@ ________________________________________________________________________________
 ```{r feature engineering}
 train_raw <- train_raw %>%
   mutate(
+    loan_to_income = loan_amnt / pmax(annual_inc, 1),
+    installment_to_monthly_income = installment / pmax(annual_inc / 12, 1),
     installment_to_loanamt = installment / pmax(loan_amnt, 1),
-    installment_to_income = installment / pmax(annual_inc, 1),
-    loan_to_income = loan_amnt / pmax(annual_inc, 1)
+    revol_bal_to_income = revol_bal / pmax(annual_inc, 1),
+    total_credit_lines_per_open = total_acc / pmax(open_acc, 1)
   )
 ```
 
@@ -1553,13 +1551,83 @@ train_raw <- train_raw %>%
 ```{r feature engineering}
 hold_raw <- hold_raw %>%
   mutate(
+    loan_to_income = loan_amnt / pmax(annual_inc, 1),
+    installment_to_monthly_income = installment / pmax(annual_inc / 12, 1),
     installment_to_loanamt = installment / pmax(loan_amnt, 1),
-    installment_to_income = installment / pmax(annual_inc, 1),
-    loan_to_income = loan_amnt / pmax(annual_inc, 1)
+    revol_bal_to_income = revol_bal / pmax(annual_inc, 1),
+    total_credit_lines_per_open = total_acc / pmax(open_acc, 1)
   )
 ```
 
-### Final Cleanup
+### Creating ZIP Feature
+_____________________________________________________________________________________________________________
+
+#### Training Dataset
+
+```{r feature engineering}
+train_raw <- train_raw %>%
+  mutate(
+    zip_code = stringr::str_extract(address, "\\d{5}$")
+  )
+```
+
+#### Holdout Dataset
+
+```{r feature engineering}
+hold_raw <- hold_raw %>%
+  mutate(
+    zip_code = stringr::str_extract(address, "\\d{5}$")
+  )
+```
+
+### Outlier Flags
+_____________________________________________________________________________________________________________
+
+```{r}
+outlier_vars <- c(
+  "annual_inc", "dti", "open_acc", "pub_rec",
+  "revol_bal", "mort_acc", "loan_amnt"
+)
+
+outlier_caps <- purrr::map_dbl(
+  outlier_vars,
+  ~ quantile(train_raw[[.x]], probs = 0.99, na.rm = TRUE, names = FALSE)
+)
+
+names(outlier_caps) <- outlier_vars
+
+for (v in outlier_vars) {
+  cap_value <- outlier_caps[[v]]
+
+  train_raw[[paste0(v, "_outlier_flag")]] <- ifelse(
+    !is.na(train_raw[[v]]) & train_raw[[v]] > cap_value, 1, 0
+  )
+
+  hold_raw[[paste0(v, "_outlier_flag")]] <- ifelse(
+    !is.na(hold_raw[[v]]) & hold_raw[[v]] > cap_value, 1, 0
+  )
+
+  train_raw[[v]] <- pmin(train_raw[[v]], cap_value)
+  hold_raw[[v]] <- pmin(hold_raw[[v]], cap_value)
+}
+
+train_raw <- train_raw %>%
+  mutate(
+    log_annual_inc = log1p(pmax(annual_inc, 0)),
+    log_revol_bal = log1p(pmax(revol_bal, 0)),
+    log_loan_amnt = log1p(pmax(loan_amnt, 0))
+  )
+
+hold_raw <- hold_raw %>%
+  mutate(
+    log_annual_inc = log1p(pmax(annual_inc, 0)),
+    log_revol_bal = log1p(pmax(revol_bal, 0)),
+    log_loan_amnt = log1p(pmax(loan_amnt, 0))
+  )
+```
+
+
+### Feature Removal
 _____________________________________________________________________________________________________________
 
 The cleaned dataset has no missing values after preprocessing and contains a mixture of numeric, categorical, and engineered predictors.
@@ -1569,31 +1637,102 @@ The cleaned dataset has no missing values after preprocessing and contains a mix
 ```{r feature engineering}
 train_raw <- train_raw %>%
   select(
+    -address,
     -issue_d,
     -earliest_cr_line,
+    -last_credit_pull_d,
     -grade,
     -sub_grade,
     -fico_range_low,
     -fico_range_high,
     -installment,
-    -annual_inc
+    -annual_inc,
+    -inq_last_6mths,
+    -acc_now_delinq,
+    -pub_rec_bankruptcies
   )
 ```
+
 
 #### Holdout Dataset
 
 ```{r feature engineering}
 hold_raw <- hold_raw %>%
   select(
+    -address,
     -issue_d,
     -earliest_cr_line,
+    -last_credit_pull_d,
     -grade,
     -sub_grade,
     -fico_range_low,
     -fico_range_high,
     -installment,
-    -annual_inc
+    -annual_inc,
+    -inq_last_6mths,
+    -acc_now_delinq,
+    -pub_rec_bankruptcies
   )
+```
+
+### Manual Rare Category Handling
+____________________________________________________________________________________________________________
+
+```{r data preprocessing}
+collapse_levels <- function(train_col, hold_col, min_prop = 0.01) {
+  train_chr <- as.character(train_col)
+
+  keep_levels <- names(prop.table(table(train_chr, useNA = "no"))[
+    prop.table(table(train_chr, useNA = "no")) >= min_prop
+  ])
+
+  train_out <- ifelse(
+    is.na(train_chr), "Missing",
+    ifelse(train_chr %in% keep_levels, train_chr, "Other")
+  )
+
+  hold_chr <- as.character(hold_col)
+
+  hold_out <- ifelse(
+    is.na(hold_chr), "Missing",
+    ifelse(hold_chr %in% keep_levels, hold_chr, "Other")
+  )
+
+  final_levels <- sort(unique(c(train_out, "Missing", "Other")))
+
+  list(
+    train = factor(train_out, levels = final_levels),
+    hold = factor(hold_out, levels = final_levels)
+  )
+}
+```
+
+```{r data preprocessing}
+categorical_cols <- names(train_raw)[sapply(train_raw, function(x) is.character(x) || is.factor(x))]
+categorical_cols <- setdiff(categorical_cols, "loan_default")
+
+for (v in categorical_cols) {
+  collapsed <- collapse_levels(train_raw[[v]], hold_raw[[v]], min_prop = 0.01)
+
+  train_raw[[v]] <- collapsed$train
+  hold_raw[[v]] <- collapsed$hold
+}
+```
+
+
+```{r data preprocessing}
+num_cols_train <- names(train_raw)[sapply(train_raw, is.numeric)]
+
+train_medians <- sapply(train_raw[num_cols_train], median, na.rm = TRUE)
+train_medians[is.na(train_medians)] <- 0
+
+for (v in num_cols_train) {
+  train_raw[[v]][!is.finite(train_raw[[v]])] <- NA_real_
+  hold_raw[[v]][!is.finite(hold_raw[[v]])] <- NA_real_
+
+  train_raw[[v]][is.na(train_raw[[v]])] <- train_medians[[v]]
+  hold_raw[[v]][is.na(hold_raw[[v]])] <- train_medians[[v]]
+}
 ```
 
 ## *Re-Assignment*
