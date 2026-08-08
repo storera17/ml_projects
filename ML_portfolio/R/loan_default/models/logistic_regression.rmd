@@ -71,10 +71,45 @@ project_dir <- "ML_portfolio/R/loan_default/data"
 
 # **Read in the Data**
 
+## *Training Dataset*
+
 ```{r load}
 train <- readRDS("train.rds")
+```
+
+## *Undersampled Training Dataset*
+
+```{r load}
 train_under <- readRDS("train_under.rds")
+```
+
+## *Holdout Dataset*
+
+```{r load}
 hold <- readRDS("holdout.rds")
+```
+
+# **Handling Target Variable**
+
+## *Training Dataset*
+
+```{r target}
+train_logit <- train %>%
+  mutate(loan_default = factor(loan_default, levels = c("Yes", "No")))
+```
+
+## *Undersampled Training Dataset*
+
+```{r target}
+train_logit_under<- train %>%
+  mutate(loan_default = factor(loan_default, levels = c("Yes", "No")))
+```
+
+## *Holdout Dataset*
+
+```{r target}
+hold_logit <- hold %>%
+  mutate(loan_default = factor(loan_default, levels = c("Yes", "No")))
 ```
 
 # **Skim the Data**
@@ -164,6 +199,8 @@ The `tuneGrid` arguement utilizes the `expand.grid()` function with two nested `
 ### Determine Parameters
 ____________________________________________________________________________________________________________
 
+Lasso regularization fits a logistic regression model with an L1 penalty. The L1 penalty can shrink some coefficients exactly to zero, so lasso can perform both regularization and variable selection. Because the outcome is binary, the model was fit with `family = "binomial"`. The target variable was releveled so that `Yes` is the event class used by `twoClassSummary()`.
+
 #### Set Up `trainControl()`
 
 ```{r lasso}
@@ -183,29 +220,13 @@ grid <- expand.grid(
 )
 ```
 
-
-### Model Fitting
+### Fit Model
 ____________________________________________________________________________________________________________
-
-#### Fit Model on Imbalanced Training Dataset
 
 ```{r lasso}
 log_lasso <- caret::train(
   loan_default ~ .,
   data = train,
-  method = "glmnet",
-  trControl = ctrl,
-  tuneGrid = grid,
-  metric = "ROC",
-  family = "binomial")
-```
-
-#### Fit Model on Undersampled Training Dataset
-
-```{r lasso}
-log_lasso_under <- caret::train(
-  loan_default ~ .,
-  data = train_under,
   method = "glmnet",
   trControl = ctrl,
   tuneGrid = grid,
@@ -361,41 +382,6 @@ ________________________________________________________________________________
 ### Store & Export
 ____________________________________________________________________________________________________________
 
-
-
-### Fit the Model
-
-The original parameters are commented out such that we could explore the optimal values. We first used the seq() function and got values for alpha and lambda as 0.25 and 0.001, respectively. Then, we set lambda to be 0.001 and let optimized our alpha value and got it to be 0.11111111. Finally, we optimized lambda, just to double-check, and at a set 0.11111111 alpha value, the best lambda we got was 0.001.
-
-```{r}
-logit_fit <- caret::train(
-  loan_default ~ .,
-  data = train,
-  method = "glmnet",
-  trControl = ctrl,
-  tuneGrid = expand.grid(
-    alpha = seq(0, 1, length=8),
-    lambda = seq(.001,.1, length=5)),
-  metric = "ROC",
-  family = "binomial"
-)
-```
-
-```{r}
-#assigned_variable <- caret::train(
-#  target_variable ~ .,
-#  data = dataset_to_be_used
-#  method = "model_type_used"
-#
-#)
-```
-
-**Explanation of the tuneGrid argument**
-
-- alpha = 1: Sets the model to LASSO regression.
-- tuneGrid: This creates a grid of lambda values for cv.
-  - Small lambda → less penalty → model behaves more like plain logistic regression.
-  - Large lambda → more shrinkage → more coefficients get pushed toward zero.
 
 **Below is a graphical exploration of the model to find the optimal lambda value**
 
