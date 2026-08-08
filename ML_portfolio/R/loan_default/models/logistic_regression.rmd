@@ -486,15 +486,54 @@ saveRDS(ridge_results, file.path(project_dir, "log_ridge_results.rds"))
 
 ## *Logistic Regression Model - Elastic Net Regularization*
 
-### Determine Optimal Parameters
+### Determine Parameters
 ____________________________________________________________________________________________________________
 
+Elastic net combines L1 and L2 regularization. It is useful when predictors are correlated but variable selection is still desired. The `alpha` parameter controls the balance between ridge and lasso behavior.
 
+#### Set Up `trainControl()`
+
+```{r elastic}
+ctrl <- trainControl(method = "cv", 
+                     number = 4,
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     savePredictions = "final")
+```
+
+#### Set Up `tuneGrid()`
+
+```{r elastic}
+elastic_grid <- expand.grid(
+  alpha = seq(0.1, 0.9, length = 5),
+  lambda = seq(0.001, 0.1, length = 5)
+)
+```
 
 ### Fit Model
 ____________________________________________________________________________________________________________
 
+```{r elastic}
+set.seed(123)
 
+log_elastic <- caret::train(
+  loan_default ~ .,
+  data = train_logit,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = elastic_grid,
+  metric = "ROC",
+  family = "binomial"
+)
+```
+
+```{r elastic}
+log_elastic
+```
+
+```{r elastic}
+log_elastic$bestTune
+```
 
 ### Predict on Holdout Dataset
 ____________________________________________________________________________________________________________
