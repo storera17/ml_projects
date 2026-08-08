@@ -541,9 +541,9 @@ ________________________________________________________________________________
 
 #### Predict Probabilities
 
-```{r lasso}
-lasso_prob <- predict(
-  model = log_lasso,
+```{r elastic}
+elastic_prob <- predict(
+  model = log_elastic,
   newdata = hold_logit,
   type = "prob"
 )[, "Yes"]
@@ -551,9 +551,9 @@ lasso_prob <- predict(
 
 #### Predict Class
 
-```{r lasso}
-lasso_pred <- predict(
-  model = log_lasso,
+```{r elastic}
+elastic_pred <- predict(
+  model = elastic_lasso,
   newdata = hold_logit,
   type = "raw"
 )
@@ -561,18 +561,18 @@ lasso_pred <- predict(
 
 #### Tabulate Predictions
 
-```{r lasso}
-lasso_predictions <- tibble::tibble(
+```{r elastic}
+elastic_predictions <- tibble::tibble(
   actual = hold_logit$loan_default,
-  predicted = lasso_pred,
-  probability_yes = lasso_prob
+  predicted = elastic_pred,
+  probability_yes = elastic_prob
 )
 ```
 
 #### Preview Table
 
-```{r lasso}
-head(lasso_predictions)
+```{r elastic}
+head(elastic_predictions)
 ```
 
 ### Evaluate
