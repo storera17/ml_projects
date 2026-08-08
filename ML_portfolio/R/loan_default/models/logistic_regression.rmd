@@ -101,7 +101,7 @@ train_logit <- train %>%
 ## *Undersampled Training Dataset*
 
 ```{r target}
-train_logit_under<- train %>%
+train_under_logit <- train %>%
   mutate(loan_default = factor(loan_default, levels = c("Yes", "No")))
 ```
 
@@ -472,7 +472,7 @@ saveRDS(log_ridge, file.path(project_dir, "log_ridge_model.rds"))
 #### Save Results
 
 ```{r ridge}
-ridge_results <- lasso_metrics %>%
+ridge_results <- ridge_metrics %>%
   mutate(
     model_type = "Logistic Regression",
     regularization = "Ridge",
@@ -578,39 +578,159 @@ head(elastic_predictions)
 ### Evaluate
 ____________________________________________________________________________________________________________
 
-
+```{r elastic}
+elastic_metrics <- evaluate_classifier(
+  actual = elastic_predictions$actual,
+  predicted = elastic_predictions$predicted,
+  probability_yes = elastic_predictions$probability_yes
+)
+```
 
 ### Store & Export
 ____________________________________________________________________________________________________________
 
+#### Save Model
 
+```{r elastic}
+saveRDS(log_elastic, file.path(project_dir, "log_elastic_model.rds"))
+```
 
-# *Logistic Regression Model - Lasso Regularization - Undersample*
+#### Save Results
 
-### Determine Optimal Parameters
+```{r ridge}
+elastic_results <- elastic_metrics %>%
+  mutate(
+    model_type = "Logistic Regression",
+    regularization = "Elastic Net",
+    sample = "Full",
+    alpha = log_elastic$bestTune$alpha,
+    lambda = log_elastic$bestTune$lambda
+  )
+
+saveRDS(elastic_results, file.path(project_dir, "log_elastic_results.rds"))
+```
+
+## *Logistic Regression Model - Lasso Regularization - Undersample*
+
+### Determine Parameters
 ____________________________________________________________________________________________________________
 
+#### Set Up `trainControl()`
 
+```{r lasso}
+ctrl <- trainControl(method = "cv", 
+                     number = 4,
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     savePredictions = "final")
+```
+
+#### Set Up `tuneGrid()`
+
+```{r lasso}
+lasso_grid_us <- expand.grid(
+  alpha = 1,
+  lambda = seq(0.001, 0.1, length = 5)
+)
+```
 
 ### Fit Model
 ____________________________________________________________________________________________________________
 
+```{r lasso}
+set.seed(123)
 
+log_lasso_us <- caret::train(
+  loan_default ~ .,
+  data = train_under_logit,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = lasso_grid_us,
+  metric = "ROC",
+  family = "binomial")
+```
+
+```{r lasso}
+log_lasso_us
+```
+
+```{r lasso}
+log_lasso_us$bestTune
+```
 
 ### Predict on Holdout Dataset
 ____________________________________________________________________________________________________________
 
+#### Predict Probabilities
 
+```{r lasso}
+lasso_prob_us <- predict(
+  model = log_lasso_us,
+  newdata = hold_logit,
+  type = "prob"
+)[, "Yes"]
+```
+
+#### Predict Class
+
+```{r lasso}
+lasso_pred_us <- predict(
+  model = log_lasso_us,
+  newdata = hold_logit,
+  type = "raw"
+)
+```
+
+#### Tabulate Predictions
+
+```{r lasso}
+lasso_predictions_us <- tibble::tibble(
+  actual = hold_logit$loan_default,
+  predicted = lasso_pred_us,
+  probability_yes = lasso_prob_us
+)
+```
+
+#### Preview Table
+
+```{r lasso}
+head(lasso_predictions_us)
+```
 
 ### Evaluate
 ____________________________________________________________________________________________________________
 
-
+```{r lasso}
+lasso_metrics_us <- evaluate_classifier(
+  actual(lasso_predictions_us$actual,
+  predicted = lasso_predictions_us$predicted,
+  probability_yes = lasso_predictions_us$probability_yes)
+)
+```
 
 ### Store & Export
 ____________________________________________________________________________________________________________
 
+#### Save Model
 
+```{r lasso}
+saveRDS(log_lasso_us, file.path(project_dir, "log_lasso_undersampled_model.rds"))
+```
+
+#### Save Results
+
+```{r lasso}
+lasso_results_us <- lasso_metrics_us %>%
+  mutate(
+    model_type = "Logistic Regression",
+    regularization = "Lasso",
+    sample = "Undersampled",
+    alpha = log_lasso$bestTune$alpha,
+    lambda = log_lasso$bestTune$lambda
+  )
+
+saveRDS(lasso_results_us, file.path(project_dir, "log_lasso_undersampled_results.rds"))
+```
 
 ## *Logistic Regression Model - Ridge Regularization - Undersample*
 
