@@ -452,7 +452,13 @@ head(ridge_predictions)
 ### Evaluate
 ____________________________________________________________________________________________________________
 
-
+```{r ridge}
+ridge_metrics <- evaluate_classifier(
+  actual = ridge_predictions$actual,
+  predicted = ridge_predictions$predicted,
+  probability_yes = ridge_predictions$probability_yes
+)
+```
 
 ### Store & Export
 ____________________________________________________________________________________________________________
