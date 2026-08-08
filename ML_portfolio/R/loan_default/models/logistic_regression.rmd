@@ -265,6 +265,8 @@ lasso_grid <- expand.grid(
 ____________________________________________________________________________________________________________
 
 ```{r lasso}
+set.seed(123)
+
 log_lasso <- caret::train(
   loan_default ~ .,
   data = train,
@@ -359,15 +361,46 @@ saveRDS(lasso_results, file.path(project_dir, "log_lasso_results.rds"))
 
 ## *Logistic Regression Model - Ridge Regularization*
 
-### Determine Optimal Parameters
+### Determine Parameters
 ____________________________________________________________________________________________________________
 
+Ridge regularization fits a logistic regression model with an L2 penalty. Unlike lasso, ridge does not usually force coefficients exactly to zero. Instead, it shrinks coefficients toward zero, which can improve stability when predictors are correlated.
 
+#### Set Up `trainControl()`
+
+```{r ridge}
+ctrl <- trainControl(method = "cv", 
+                     number = 4,
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     savePredictions = "final")
+```
+
+#### Set Up `tuneGrid()`
+
+```{r ridge}
+ridge_grid <- expand.grid(
+  alpha = 0,
+  lambda = seq(0.001, 0.1, length = 5)
+)
+```
 
 ### Fit Model
 ____________________________________________________________________________________________________________
 
+```{r ridge}
+set.seed(123)
 
+log_ridge <- caret::train(
+  loan_default ~ .,
+  data = train_logit,
+  method = "glmnet",
+  trControl = ctrl,
+  tuneGrid = ridge_grid,
+  metric = "ROC",
+  family = "binomial"
+)
+```
 
 ### Predict on Holdout Dataset
 ____________________________________________________________________________________________________________
